@@ -733,7 +733,7 @@ _CreateMasterAddressLookup(CFStringRef name, CFHostInfoType info, CFTypeRef cont
 
 			// No error set, see if errno has anything.  If so, mark the error as
 			// a POSIX error.
-			else if (error->error = errno)
+			else if ((error->error = errno))
 				error->domain = (CFStreamErrorDomain)kCFStreamErrorDomainPOSIX;
 
 			// Don't know what happened, so mark it as an internal netdb error.
@@ -912,7 +912,7 @@ _CreateNameLookup(CFDataRef address, void* context, CFStreamError* error) {
 
 		// No error set, see if errno has anything.  If so, mark the error as
 		// a POSIX error.
-		else if (error->error = errno)
+		else if ((error->error = errno))
 			error->domain = (CFStreamErrorDomain)kCFStreamErrorDomainPOSIX;
 
 		// Don't know what happened, so mark it as an internal netdb error.
@@ -1064,7 +1064,7 @@ _CreateDNSLookup(CFTypeRef thing, CFHostInfoType type, void* context, CFStreamEr
 
 			// No error set, see if errno has anything.  If so, mark the error as
 			// a POSIX error.
-			else if (error->error = errno)
+			else if ((error->error = errno))
 				error->domain = (CFStreamErrorDomain)kCFStreamErrorDomainPOSIX;
 
 			// Don't know what happened, so mark it as an internal netdb error.
