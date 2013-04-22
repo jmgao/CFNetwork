@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,21 +17,21 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*
  * Copyright (c) 2000-2004 Apple Computer, Inc. All Rights Reserved.
- * 
+ *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -39,12 +39,12 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 
 /*
- * Private routines used by NtlmGenerator module. 
+ * Private routines used by NtlmGenerator module.
  */
 
 #ifndef _NTLM_BLOB_PRIV_H_
@@ -69,7 +69,7 @@ extern "C" {
 #else
 #define dprintf(args...)
 #endif
- 
+
 /*
  * Common error returns.
  *
@@ -83,7 +83,7 @@ extern "C" {
  */
 #define NTLM_ERR_PROTOCOL_MISMATCH  errSecAuthFailed
 
-/* 
+/*
  * For debugging using fixed pamaters via sourceforge "test vectors".
  */
 #define DEBUG_FIXED_CHALLENGE   0
@@ -113,8 +113,8 @@ extern "C" {
 /* foreced length of LM-style uppper case password */
 #define NTLM_LM_PASSWORD_LEN		14
 
-/* 
- * Flags - defined here in native endianness; sent over the wire little-endian 
+/*
+ * Flags - defined here in native endianness; sent over the wire little-endian
  */
 #define NTLM_NegotiateUnicode		0x00000001
 #define NTLM_NegotiateOEM			0x00000002
@@ -153,10 +153,10 @@ extern "C" {
 void serializeUint32(
 	uint32_t			num,
 	unsigned char		*buf);
-	
+
 uint32_t deserializeUint32(
 	const unsigned char *buf);
-	
+
 uint16_t deserializeUint16(
 	const unsigned char *buf);
 
@@ -164,14 +164,14 @@ uint16_t deserializeUint16(
 void appendUint32(
 	CFMutableDataRef	buf,
 	uint32_t			word);
-	
+
 /* write a 16-bit word, little endian */
 void appendUint16(
 	CFMutableDataRef	buf,
 	uint16_t			word);
 
-/* 
- * Write a security buffer, providing the index into the CFData at which 
+/*
+ * Write a security buffer, providing the index into the CFData at which
  * this security buffer's offset is located. Just before the actual data is written,
  * go back and update the offset with the start of that data using secBufOffset().
  */
@@ -203,7 +203,7 @@ OSStatus ntlmParseSecBuffer(
 void ntlmRand(
 	unsigned		len,
 	void			*buf);				/* allocated by caller, random data RETURNED */
-	
+
 /* Obtain host name in appropriate encoding */
 OSStatus ntlmHostName(
 	bool			unicode,
@@ -214,7 +214,7 @@ void ntlmAppendTimestamp(
 	CFMutableDataRef ntlmV2Blob);
 
 /*
- * Convert CFString to little-endian unicode. 
+ * Convert CFString to little-endian unicode.
  */
 void ntlmStringToLE(
 	CFStringRef		pwd,
@@ -223,8 +223,8 @@ void ntlmStringToLE(
 
 /*
  * Convert a CFStringRef into a mallocd array of chars suitable for the specified
- * encoding. This might return an error if the string can't be converted 
- * appropriately. 
+ * encoding. This might return an error if the string can't be converted
+ * appropriately.
  */
 OSStatus ntlmStringFlatten(
 	CFStringRef str,
@@ -242,12 +242,12 @@ void md5Hash(
 	const unsigned char *data,
 	unsigned			dataLen,
 	unsigned char		*digest);		// caller-supplied, NTLM_DIGEST_LENGTH */
-	
+
 /*
- * Calculate LM-style password hash. This really only works if the password 
+ * Calculate LM-style password hash. This really only works if the password
  * is convertible to ASCII.
  */
-OSStatus lmPasswordHash(	
+OSStatus lmPasswordHash(
 	CSSM_CSP_HANDLE		cspHand,
 	CFStringRef			pwd,
 	unsigned char		*digest);		// caller-supplied, NTLM_DIGEST_LENGTH
@@ -258,24 +258,24 @@ OSStatus lmPasswordHash(
 void ntlmPasswordHash(
 	CFStringRef			pwd,
 	unsigned char		*digest);		// caller-supplied, NTLM_DIGEST_LENGTH
-	
-/* 
+
+/*
  * NTLM response: DES with three different keys.
  */
 OSStatus ntlmResponse(
 	CSSM_CSP_HANDLE		cspHand,
 	const unsigned char *digest,		// NTLM_DIGEST_LENGTH bytes
-	const unsigned char *challenge,		// actually challenge or session hash 
+	const unsigned char *challenge,		// actually challenge or session hash
 	unsigned char		*ntlmResp);		// caller-supplied NTLM_LM_RESPONSE_LEN
-	
+
 /* DES-related consts */
 #define DES_BLOCK_SIZE		8
 #define DES_RAW_KEY_SIZE	7
 #define DES_KEY_SIZE		8
 
 /*
- * Given 7 bytes, create 8-byte DES key. Our implementation ignores the 
- * parity bit (lsb), which simplifies this somewhat. 
+ * Given 7 bytes, create 8-byte DES key. Our implementation ignores the
+ * parity bit (lsb), which simplifies this somewhat.
  */
 void ntlmMakeDesKey(
 	const unsigned char *inKey,			// DES_RAW_KEY_SIZE bytes
@@ -283,7 +283,7 @@ void ntlmMakeDesKey(
 
 /*
  * single block DES encrypt.
- * This would really benefit from a DES implementation in CommonCrypto. 
+ * This would really benefit from a DES implementation in CommonCrypto.
  */
 OSStatus ntlmDesCrypt(
 	CSSM_CSP_HANDLE		cspHand,
@@ -296,7 +296,7 @@ OSStatus ntlmDesCrypt(
  */
 OSStatus ntlmHmacMD5(
 	CSSM_CSP_HANDLE		cspHand,
-	const unsigned char *key,	
+	const unsigned char *key,
 	unsigned			keyLen,
 	const unsigned char *inData,
 	unsigned			inDataLen,

@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 #include "CFHTTPConnectionInternal.h"
@@ -98,8 +98,8 @@ static void destroyStreamInfo(CFAllocatorRef alloc, _CFHTTPStreamInfo *streamInf
     if (__CFBitIsSet(streamInfo->flags, IS_ZOMBIE) && streamInfo->stream) CFRelease(streamInfo->stream);
     if (streamInfo->requestFragment) CFRelease(streamInfo->requestFragment);
     if (streamInfo->stateChangeSource) CFRelease(streamInfo->stateChangeSource);
-    
-    CFAllocatorDeallocate(alloc, streamInfo); 
+
+    CFAllocatorDeallocate(alloc, streamInfo);
 }
 
 static _CFHTTPStreamInfo *createZombieDouble(CFAllocatorRef alloc, _CFHTTPStreamInfo *orig, _CFNetConnectionRef conn) {
@@ -120,7 +120,7 @@ static _CFHTTPStreamInfo *createZombieDouble(CFAllocatorRef alloc, _CFHTTPStream
     // Sadly, the zombie needs the original request in case there was auth on it; we may need to advance the state of the auth token when our response comes in.
     zombie->request = orig->request;
     CFRetain(zombie->request);
-	
+
     // For both of these, we want to transfer ownership to the zombie.  The original will have to deal without.
     zombie->requestFragment = orig->requestFragment;
     if (zombie->requestFragment) orig->requestFragment = NULL;
@@ -132,7 +132,7 @@ static _CFHTTPStreamInfo *createZombieDouble(CFAllocatorRef alloc, _CFHTTPStream
     } else {
         zombie->requestPayload = NULL;
     }
-    
+
     // This is kinda ugly, but the zombie needs to know where it should schedule/unschedule, and the usual
     // way to do that is to look at its response stream.  So, we create a dummy response stream and schedule
     // it wherever orig->responseStream is scheduled.  Since we never open the stream, life should be good....
@@ -164,7 +164,7 @@ static const _CFNetConnectionCallBacks HTTPConnectionCallBacks =  {
 };
 
 static const CFReadStreamCallBacks HTTPStreamCallBacks = {
-    1, 
+    1,
     httpStreamCreate,
     httpStreamFinalize,
     httpStreamCopyDescription,
@@ -183,7 +183,7 @@ static const CFReadStreamCallBacks HTTPStreamCallBacks = {
 
 
 CFHTTPConnectionRef CFHTTPConnectionCreate(CFAllocatorRef alloc, CFStringRef host, SInt32 port, UInt32 connectionType, CFDictionaryRef streamProperties) {
-    _CFHTTPConnectionInfo info = {host, port, connectionType, streamProperties}; 
+    _CFHTTPConnectionInfo info = {host, port, connectionType, streamProperties};
     _CFNetConnectionRef conn = _CFNetConnectionCreate(alloc, &info, &HTTPConnectionCallBacks, FALSE);
     return conn;
 }
@@ -233,25 +233,25 @@ static void httpConnectionFinalize(CFAllocatorRef alloc, const void *info) {
 		CFSetApplyFunction(connInfo->authentications,
 						   (CFSetApplierFunction)_CFHTTPAuthenticationDisassociateConnection,
 						   connInfo);
-		
+
 		CFRelease(connInfo->authentications);
 	}
     CFAllocatorDeallocate(alloc, connInfo);
 }
 
 static void _CFStreamSocketCreatedCallBack(int fd, void* ctxt) {
-	
+
 	int yes = 1;
-	
+
 	(void)ctxt;		/* unused */
-	
+
 	setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void*)&yes, sizeof(yes));
 }
 
 static CFStreamError httpConnectionCreateStreams(CFAllocatorRef allocator, const void *info, CFWriteStreamRef *requestStream, CFReadStreamRef *responseStream) {
     _CFHTTPConnectionInfo *connInfo = (_CFHTTPConnectionInfo *)info;
     CFIndex count;
-    
+
     CFReadStreamRef rStream;
     CFWriteStreamRef wStream;
 	CFArrayRef callback;
@@ -259,7 +259,7 @@ static CFStreamError httpConnectionCreateStreams(CFAllocatorRef allocator, const
 	const void* values[2] = {_CFStreamSocketCreatedCallBack, NULL};
 
     CFStreamError err = {0, 0};
-    
+
     // Create the socket streams ourselves
 	_CFSocketStreamCreatePair(allocator, connInfo->host, connInfo->port, 0, NULL, &rStream, &wStream);
     if (!rStream) {
@@ -267,9 +267,9 @@ static CFStreamError httpConnectionCreateStreams(CFAllocatorRef allocator, const
         err.error = ENOMEM;
         return err;
     }
-	
+
 	callback = CFArrayCreate(allocator, values, sizeof(values) / sizeof(values[0]), &cb);
-	
+
 	if (callback) {
 		CFWriteStreamSetProperty(wStream, _kCFStreamSocketCreatedCallBack, callback);
 		CFRelease(callback);
@@ -285,7 +285,7 @@ static CFStreamError httpConnectionCreateStreams(CFAllocatorRef allocator, const
     *responseStream = CFReadStreamCreateHTTPStream(allocator, rStream, TRUE);
     CFReadStreamSetProperty(*responseStream, _kCFStreamPropertyHTTPPersistent, kCFBooleanTrue);
     CFRelease(rStream);
-    
+
     if (connInfo->streamProperties && (count = CFDictionaryGetCount(connInfo->streamProperties)) > 0) {
         CFStringRef *keys = CFAllocatorAllocate(allocator, sizeof(CFStringRef)*count*2, 0);
         CFTypeRef *values = (CFTypeRef *)(keys + count);
@@ -309,10 +309,10 @@ static void prepareTransmission(_CFHTTPStreamInfo *streamInfo, CFWriteStreamRef 
 	Boolean persistent = _CFNetConnectionWillEnqueueRequests(conn);
 	_CFHTTPConnectionInfo* identifier = (_CFHTTPConnectionInfo*)_CFNetConnectionGetInfoPointer(conn);
         Boolean forProxy = (identifier->type == kHTTPProxy) || (identifier->type == kHTTPSProxy);
-	
+
     CFStreamClientContext ctxt = {0, streamInfo, NULL, NULL, NULL};
     CFDataRef payload = NULL;
-    
+
     // Set requestPayload properly; clean up the request
     if (__CFBitIsSet(streamInfo->flags, PAYLOAD_IS_DATA) && (payload = CFHTTPMessageCopyBody(streamInfo->request)) != NULL) {
         CFIndex length = CFDataGetLength(payload);
@@ -321,13 +321,13 @@ static void prepareTransmission(_CFHTTPStreamInfo *streamInfo, CFWriteStreamRef 
             CFReadStreamClose(streamInfo->requestPayload);
             CFRelease(streamInfo->requestPayload);
         }
-        
+
         if (length) {
             streamInfo->requestPayload = CFReadStreamCreateWithBytesNoCopy(CFGetAllocator(payload), CFDataGetBytePtr(payload), length, kCFAllocatorNull);
         } else {
             streamInfo->requestPayload = NULL;
         }
-            
+
         CFRelease(payload); // originalRequest is holding it for us
         cleanUpRequest(streamInfo->request, length, TRUE, forProxy);
     } else if (!streamInfo->requestPayload) {
@@ -335,29 +335,29 @@ static void prepareTransmission(_CFHTTPStreamInfo *streamInfo, CFWriteStreamRef 
     } else {
         cleanUpRequest(streamInfo->request, -1, TRUE, forProxy);
     }
-    
-	
+
+
 	auth[0] = _CFHTTPMessageGetAuthentication(streamInfo->request, FALSE);
 	auth[1] = _CFHTTPMessageGetAuthentication(streamInfo->request, TRUE);
-	
+
 	for (i = 0; (i < (sizeof(auth) / sizeof(auth[0]))); i++) {
-		
+
 		if (!auth[i])
 			continue;
-		
+
 		if (!persistent) {
 			_CFHTTPAuthenticationDisassociateConnection(auth[i], identifier);
 			CFSetRemoveValue(identifier->authentications, auth[i]);
 		}
-		
+
 		else {
 			CFStreamError error = _CFHTTPAuthenticationApplyHeaderToRequest(auth[i], streamInfo->request, identifier);
-			
+
 			if (!error.error)
 				CFSetSetValue(identifier->authentications, auth[i]);
 		}
 	}
-	
+
     // Set client on payload stream and schedule
     if (streamInfo->requestPayload) {
         CFArrayRef rlArray;
@@ -419,7 +419,7 @@ static void prepareReception(_CFHTTPStreamInfo *streamInfo, CFReadStreamRef resp
 }
 
 static void addAuthenticationInfoToResponse(_CFHTTPStreamInfo *streamInfo) {
-	
+
 	int i;
     CFHTTPAuthenticationRef auth[2];
 	_CFNetConnectionRef conn = streamInfo->conn;
@@ -432,25 +432,25 @@ static void addAuthenticationInfoToResponse(_CFHTTPStreamInfo *streamInfo) {
 
 	auth[0] = _CFHTTPMessageGetAuthentication(streamInfo->request, FALSE);		/* Grab main authentication. */
 	auth[1] = _CFHTTPMessageGetAuthentication(streamInfo->request, TRUE);		/* Grab proxy authentication. */
-	
+
     /* Update authentication objects if there are some. */
 	for (i = 0; i < (sizeof(auth) / sizeof(auth[0])); i++) {
-		
+
 		if (!auth[i])
 			continue;
-		
+
 		if (!persistent) {
 			_CFHTTPAuthenticationDisassociateConnection(auth[i], identifier);
 			CFSetRemoveValue(identifier->authentications, auth[i]);
 		}
-		
+
 		_CFHTTPAuthenticationUpdateFromResponse(auth[i], streamInfo->responseHeaders, identifier);
 	}
 }
 
 static Boolean persistentIsOK(_CFHTTPStreamInfo *streamInfo, CFReadStreamRef stream) {
     Boolean persistentOK = TRUE;
-    
+
     if (!stream) {
         CFLog(0, CFSTR("Internal consistency check error for http request 0x%x"), streamInfo);
         return TRUE;
@@ -468,7 +468,7 @@ static Boolean persistentIsOK(_CFHTTPStreamInfo *streamInfo, CFReadStreamRef str
         int status = CFHTTPMessageGetResponseStatusCode(streamInfo->responseHeaders);
         if ((status >= 100 && status <200) || status == 204 || status == 304 || CFEqual(_kCFHTTPConnectionHEADMethod, requestMethod)) {
             // These are the conditions under which the server must not send further information
-            __CFBitSet(streamInfo->flags, FORCE_EOF); 
+            __CFBitSet(streamInfo->flags, FORCE_EOF);
         }
         CFRelease(requestMethod);
         persistentOK = canKeepAlive(streamInfo->responseHeaders, streamInfo->request);
@@ -518,7 +518,7 @@ static void httpConnectionStateChanged(void *request, int newState, CFStreamErro
 //        fprintf(stderr, "streamInfo %x going from state %d to %d\n", (unsigned)request, _CFHTTPStreamInfoGetState(streamInfo), newState);
 //    }
     __CFBitfieldSetValue(streamInfo->flags, MAX_STATE_BIT, MIN_STATE_BIT, newState);
-    
+
     if (streamInfo->stateChangeSource) {
         CFRunLoopSourceSignal(streamInfo->stateChangeSource);
     }
@@ -527,61 +527,61 @@ static void httpConnectionStateChanged(void *request, int newState, CFStreamErro
     case kQueued:
 		{
 			CFReadStreamRef stream = _CFNetConnectionGetResponseStream(conn);
-			
+
 			if (stream)
 			{
 				CFHTTPAuthenticationRef auth = _CFHTTPMessageGetAuthentication(streamInfo->request, TRUE);
-				
+
 				if (auth) {
 					CFStringRef method = CFHTTPAuthenticationCopyMethod(auth);
-					
+
 					if (method && (CFStringCompare(method, _kCFNTLMMethod, kCFCompareCaseInsensitive) == kCFCompareEqualTo)) {
-						
+
 						CFURLRef url = CFHTTPMessageCopyRequestURL(streamInfo->request);
 						CFStringRef scheme = url ? CFURLCopyScheme(url) : NULL;
-						
+
 						if (scheme && (CFStringCompare(scheme, _kCFHTTPSScheme, kCFCompareCaseInsensitive) == kCFCompareEqualTo)) {
-							
+
 							CFAllocatorRef alloc = CFGetAllocator(stream);
 							CFMutableDictionaryRef new_value = NULL;
 							CFStringRef header;
 							CFDictionaryRef property = CFReadStreamCopyProperty(stream, kCFStreamPropertyCONNECTProxy);
-							
+
 							_CFHTTPAuthenticationApplyHeaderToRequest(auth, streamInfo->request, _CFNetConnectionGetInfoPointer(conn));
-							
+
 							new_value = CFDictionaryCreateMutableCopy(alloc, 0, property);
 							CFRelease(property);
-							
+
 							header = CFHTTPMessageCopyHeaderFieldValue(streamInfo->request, _kCFHTTPStreamProxyAuthorizationHeader);
 							if (header) {
-								
+
 								CFMutableDictionaryRef headers = NULL;
-								
+
 								property = CFDictionaryGetValue(new_value, kCFStreamPropertyCONNECTAdditionalHeaders);
-								
+
 								if (property)
 									headers = CFDictionaryCreateMutableCopy(alloc, 0, property);
 								else
 									headers = CFDictionaryCreateMutable(alloc, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-								
+
 								CFDictionarySetValue(headers, _kCFHTTPStreamProxyAuthorizationHeader, header);
 								CFRelease(header);
-								
+
 								CFDictionarySetValue(headers, _kCFHTTPStreamProxyConnectionHeader, _kCFHTTPStreamConnectionKeepAlive);
-								
+
 								CFDictionarySetValue(new_value, kCFStreamPropertyCONNECTAdditionalHeaders, headers);
 								CFRelease(headers);
 							}
-							
+
 							CFReadStreamSetProperty(stream, kCFStreamPropertyCONNECTProxy, new_value);
-							
+
 							CFRelease(new_value);
 						}
-						
+
 						if (url) CFRelease(url);
 						if (scheme) CFRelease(scheme);
 					}
-					
+
 					if (method) CFRelease(method);
 				}
 			}
@@ -615,12 +615,12 @@ static Boolean transmitRequest(_CFHTTPStreamInfo *streamInfo, CFWriteStreamRef d
     UInt8 buf[BUF_SIZE];
     const UInt8 *bytes;
     error->error = 0;
-    
+
     if (__CFBitIsSet(streamInfo->flags, HAVE_SENT_REQUEST_PAYLOAD)) return TRUE;
-    
+
 	if (CFWriteStreamCopyProperty(destStream, _kCFStreamPropertyHTTPSProxyHoldYourFire))
 		return TRUE;
-    
+
     // if http->requestPayload is NULL, we still need to wait until the write stream reports canAcceptBytes, because otherwise, our request header hasn't been sent.
     if (streamInfo->requestPayload == NULL) {
         if (CFWriteStreamCanAcceptBytes(destStream)) {
@@ -852,7 +852,7 @@ static void httpConnectionResponseStreamCB(void *request, CFReadStreamRef stream
             }
         }
         break;
-    case kCFStreamEventMarkEncountered: 
+    case kCFStreamEventMarkEncountered:
         if (!justReadMark && streamInfo->conn) {
 			_CFNetConnectionResponseIsComplete(streamInfo->conn, streamInfo);
         }
@@ -912,7 +912,7 @@ static void httpConnectionRequestStreamCB(void *request, CFWriteStreamRef stream
     }
 }
 
-static void httpRequestPayloadCallBack(CFReadStreamRef stream, CFStreamEventType type, void *info) { 
+static void httpRequestPayloadCallBack(CFReadStreamRef stream, CFStreamEventType type, void *info) {
     _CFHTTPStreamInfo *streamInfo = (_CFHTTPStreamInfo *)info;
     switch (type) {
     case kCFStreamEventEndEncountered:
@@ -1060,7 +1060,7 @@ static CFIndex httpStreamRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex buf
             streamInfo->stateChangeSource = CFRunLoopSourceCreate(CFGetAllocator(stream), 0, &rlsCtxt);
         }
         CFRunLoopAddSource(currentRL, streamInfo->stateChangeSource, mode);
-    
+
         while (state < kReceivingResponse) {
             CFRunLoopRunInMode(mode, 1e+20, TRUE);
 			state = _CFNetConnectionGetState(conn, TRUE, streamInfo);
@@ -1120,7 +1120,7 @@ static CFIndex httpStreamRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex buf
             }
         }
     }
-    return result;    
+    return result;
 }
 
 static Boolean httpStreamCanRead(CFReadStreamRef myStream, void *info) {

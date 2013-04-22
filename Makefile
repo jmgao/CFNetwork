@@ -1,4 +1,4 @@
-# Simple makefile for building the CNetwork. 
+# Simple makefile for building the CNetwork.
 #
 # Define sets of files to build, other info specific to this project.
 #

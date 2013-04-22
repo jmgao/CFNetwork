@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*	CFNetConnection.c
@@ -27,7 +27,7 @@
 
 #include "CFNetworkInternal.h"
 #include "CFNetConnection.h"
-#include <CFNetwork/CFNetworkPriv.h> 
+#include <CFNetwork/CFNetworkPriv.h>
 #include <sys/types.h>
 
 #if defined(__WIN32__)
@@ -122,7 +122,7 @@ _CFNetConnectionCacheKey createConnectionCacheKey(CFStringRef host, SInt32 port,
     key->properties = properties;
     if (key->properties)
        CFRetain(key->properties);
-       
+
 	return(key);
 }
 
@@ -162,11 +162,11 @@ CFNetConnectionCacheRef createConnectionCache(void);
 CFNetConnectionCacheRef createConnectionCache(void)
 {
     CFNetConnectionCacheRef conn_cache = malloc(sizeof(struct __CFNetConnectionCache));
- 
+
     if (conn_cache) {
         CFMutableDictionaryRef dictionary;
         CFDictionaryKeyCallBacks connectionCacheCallBacks = {0, connCacheKeyRetain, connCacheKeyRelease, connCacheKeyCopyDesc, connCacheKeyEqual, connCacheKeyHash};
-        
+
         dictionary = CFDictionaryCreateMutable(NULL, 0, &connectionCacheCallBacks, &kCFTypeDictionaryValueCallBacks);
         if (dictionary) {
             conn_cache->dictionary = dictionary;
@@ -204,7 +204,7 @@ _CFNetConnectionRef findOrCreateNetConnection(CFNetConnectionCacheRef connection
     _CFNetConnectionRef conn = NULL;
     Boolean created = FALSE;
     CFIndex count;
-    
+
     if (!persistent) {
         // This request gets its own connection
         conn = _CFNetConnectionCreate(allocator, info, callbacks, TRUE);
@@ -213,7 +213,7 @@ _CFNetConnectionRef findOrCreateNetConnection(CFNetConnectionCacheRef connection
         }
     } else {
         lockConnectionCache(connectionCache);
-        
+
         conn = (_CFNetConnectionRef)CFDictionaryGetValue(connectionCache->dictionary, key);
         if (conn) {
             if (!_CFNetConnectionWillEnqueueRequests(conn)) {
@@ -223,7 +223,7 @@ _CFNetConnectionRef findOrCreateNetConnection(CFNetConnectionCacheRef connection
                 created = FALSE;
                 CFRetain(conn);
             }
-        } 
+        }
         if (!conn) {
             conn = _CFNetConnectionCreate(allocator, info, callbacks, TRUE);
             if (conn) {
@@ -266,7 +266,7 @@ void removeFromConnectionCache(CFNetConnectionCacheRef cache, _CFNetConnectionRe
 typedef struct _CFNetRequest {
     struct _CFNetRequest *next;
     void *request;
-    UInt8 flags; 
+    UInt8 flags;
 } _CFNetRequest;
 
 static inline Boolean isMarkedRequest(_CFNetRequest *req) {
@@ -291,22 +291,22 @@ static _CFNetRequest *nextRealRequest(_CFNetRequest *req) {
 typedef struct {
     CFRuntimeBase _cfBase;
     CFOptionFlags flags;
-    
+
     _CFMutex lock;
-    
+
 	UInt32	count;
-	
+
     _CFNetRequest *head;
     _CFNetRequest *tail;
     _CFNetRequest *currentRequest;
     _CFNetRequest *currentResponse;
-    
+
     CFWriteStreamRef requestStream;
     CFReadStreamRef responseStream;
 
     CFAbsoluteTime emptyTime; // The time at which this connection's queue was completely emptied
 //    int numRequests;
-    
+
     const _CFNetConnectionCallBacks *cb;
     const void *info;
 } __CFNetConnection;
@@ -361,7 +361,7 @@ static void addToList(_CFNetRequest **head, _CFNetRequest **tail, _CFNetRequest 
         newNode->next = NULL;
     }
 #if defined(DEBUG_CONNECTIONS)
-    if (!checkList(*head, *tail)) 
+    if (!checkList(*head, *tail))
         fprintf(stderr, "-- bad linked list out of addToList\n");
 #endif
 }
@@ -379,7 +379,7 @@ static Boolean isInList(_CFNetRequest *list, void *req) {
 static Boolean replaceInList(_CFNetRequest **list, _CFNetRequest **tail, void *origReq, void *newReq) {
     _CFNetRequest *p;
 #if defined(DEBUG_CONNECTIONS)
-    if (!checkList(*list, *tail)) 
+    if (!checkList(*list, *tail))
         fprintf(stderr, "-- bad linked list in to replaceInList\n");
 #endif
     for (p = *list; p != NULL; p = p->next) {
@@ -387,7 +387,7 @@ static Boolean replaceInList(_CFNetRequest **list, _CFNetRequest **tail, void *o
             p->request = newReq;
             __CFBitSet(p->flags, IS_ZOMBIE_REQUEST);
 #if defined(DEBUG_CONNECTIONS)
-            if (!checkList(*list, *tail)) 
+            if (!checkList(*list, *tail))
                 fprintf(stderr, "-- bad linked list out of replaceInList\n");
 #endif
             return TRUE;
@@ -410,7 +410,7 @@ static void _CFNetConnectionFinalize(__CFNetConnection* conn) {
         }
     }
 //    fprintf(stderr, "Processed %d requests\n", conn->numRequests);
-	if (__CFBitIsSet(conn->flags, LOCK_NET_CONNECTION)) 
+	if (__CFBitIsSet(conn->flags, LOCK_NET_CONNECTION))
 		_CFMutexDestroy(&conn->lock);
     if (conn->cb->finalize) conn->cb->finalize(alloc, conn->info);
     shutdownConnectionStreams(conn);
@@ -461,7 +461,7 @@ static void _ConnectionSetClient(__CFNetConnection* conn, Boolean set) {
     CFStreamEventType events = set ? ~0L : 0L;
     CFWriteStreamClientCallBack wcb = set ? connectionRequestCallBack : NULL;
     CFReadStreamClientCallBack rcb = set ? connectionResponseCallBack : NULL;
-    
+
     if (set)
         __CFBitSet(conn->flags, CLIENT_IS_SET);
     else
@@ -470,7 +470,7 @@ static void _ConnectionSetClient(__CFNetConnection* conn, Boolean set) {
     if (conn->requestStream) {
         CFWriteStreamSetClient(conn->requestStream, events, wcb, ctxtPtr);
     }
-    
+
     if (conn->responseStream) {
         CFReadStreamSetClient(conn->responseStream, events, rcb, ctxtPtr);
     }
@@ -513,7 +513,7 @@ static CFTypeID __kCFNetConnectionTypeID = _kCFRuntimeNotATypeID;
 
 
 static void _CFNetConnectionRegisterClass(void) {
-	
+
 	static const CFRuntimeClass __CFNetConnectionClass = {
 		0,
 		"CFNetConnection",
@@ -522,7 +522,7 @@ static void _CFNetConnectionRegisterClass(void) {
 		(void(*)(CFTypeRef))_CFNetConnectionFinalize,
 		NULL,      // equal
 		NULL,      // hash
-		NULL,      // 
+		NULL,      //
 		NULL       // copyDescription
 	};
 
@@ -534,14 +534,14 @@ CFTypeID
 _CFNetConnectionGetTypeID(void) {
 
     _CFDoOnce(&__kCFNetConnectionRegisterClass, _CFNetConnectionRegisterClass);
-    
+
     return __kCFNetConnectionTypeID;
 }
 
 
 const void*
 _CFNetConnectionGetInfoPointer(_CFNetConnectionRef arg) {
-    
+
     const void* result;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
 
@@ -558,7 +558,7 @@ _CFNetConnectionGetInfoPointer(_CFNetConnectionRef arg) {
 _CFNetConnectionCreate(CFAllocatorRef alloc, const void *info, const _CFNetConnectionCallBacks *callbacks, Boolean isThreadSafe) {
 
     __CFNetConnection* connection;
-    
+
 #if defined(LOG_CONNECTIONS)
     fprintf(stderr, "-- CFNetConnectionCreate(0x%x, 0x%x,...) -", (int)alloc, (int)info);
 #endif
@@ -578,9 +578,9 @@ _CFNetConnectionCreate(CFAllocatorRef alloc, const void *info, const _CFNetConne
         __CFBitSet(connection->flags, LOCK_NET_CONNECTION);
     }
     connection->emptyTime = CFAbsoluteTimeGetCurrent();
-	
+
 	connection->count = 0;
-	
+
     connection->head = NULL;
     connection->tail = NULL;
     connection->currentRequest = NULL;
@@ -588,25 +588,25 @@ _CFNetConnectionCreate(CFAllocatorRef alloc, const void *info, const _CFNetConne
 //    connection->numRequests = 0;
     connection->requestStream = NULL;
     connection->responseStream = NULL;
-        
+
     connection->cb = callbacks;
     if (connection->cb && connection->cb->create) {
         connection->info = connection->cb->create(alloc, info);
     } else {
         connection->info = info;
     }
-    
+
     connection->cb->createConnectionStreams(alloc,
                                             connection->info,
                                             &connection->requestStream,
                                             &connection->responseStream);
-    
+
     if (!connection->requestStream && !connection->responseStream) {
         // Creation failed
         CFRelease(connection);
         return NULL;
     }
-    
+
     _ConnectionSetClient(connection, TRUE);
 
     __CFBitSet(connection->flags, ACCEPTS_NEW_REQUESTS);
@@ -627,7 +627,7 @@ Boolean _CFNetConnectionEnqueue(_CFNetConnectionRef arg, void *req) {
 
     CFRetain(conn); // In case the callout below causes us to be released & destroyed
 	_CFNetConnectionLock(conn);
-    
+
 #if defined(LOG_CONNECTIONS)
     fprintf(stderr, "-- CFNetConnectionEnqueue(0x%x, 0x%x) - ", (int)conn, (int)req);
 #endif
@@ -656,16 +656,16 @@ Boolean _CFNetConnectionEnqueue(_CFNetConnectionRef arg, void *req) {
                     conn->cb->transmitRequest(conn->currentRequest->request, (_CFNetConnectionRef)conn, conn->info);
                 }
             }
-        } 
+        }
         if (conn->responseStream && conn->cb->runLoopAndModesArrayForRequest && conn->currentRequest != conn->currentResponse && nextRealRequest(conn->currentResponse) == newReq) {
             rescheduleStream(conn->responseStream, NULL, conn->cb->runLoopAndModesArrayForRequest(newReq->request, (_CFNetConnectionRef)conn, conn->info));
             if (!__CFBitIsSet(conn->flags, CURRENT_RESPONSE_COMPLETE)) {
                 conn->cb->receiveResponse(conn->currentResponse->request, (_CFNetConnectionRef)conn, conn->info);
             }
         }
-        
+
         conn->count++;
-		
+
         result = TRUE;
     }
 
@@ -674,7 +674,7 @@ Boolean _CFNetConnectionEnqueue(_CFNetConnectionRef arg, void *req) {
 #endif
 
 	_CFNetConnectionUnlock(conn);
-    
+
     CFRelease(conn);
 
     return result;
@@ -699,7 +699,7 @@ static void rescheduleStream(CFTypeRef stream, CFArrayRef oldRLArray, CFArrayRef
         CFIndex newRLCnt, oldRLCnt;
         newRLCnt = CFArrayGetCount(newRLArray);
         oldRLCnt = CFArrayGetCount(oldRLArray);
-        
+
         // Index over newRLArray and find what does not appear in oldRLArray; this becomes the schedule array
         for (newRLIdx = 0; newRLIdx < newRLCnt; newRLIdx += 2) {
             CFRunLoopRef rl = (CFRunLoopRef)CFArrayGetValueAtIndex(newRLArray, newRLIdx);
@@ -726,7 +726,7 @@ static void rescheduleStream(CFTypeRef stream, CFArrayRef oldRLArray, CFArrayRef
         }
         if (mutArray) scheduleArray = mutArray;
         mutArray = NULL;
-        
+
         // Index over oldRLArray and find what does not appear in newRLArray; this becomes the unschedule array
         for (oldRLIdx = 0; oldRLIdx < oldRLCnt; oldRLIdx += 2) {
             CFRunLoopRef rl = (CFRunLoopRef)CFArrayGetValueAtIndex(oldRLArray, oldRLIdx);
@@ -793,12 +793,12 @@ static CFArrayRef runLoopsAndModesForRequest(__CFNetConnection *conn, _CFNetRequ
 }
 
 /* Call from within a lock to change the request scheduled for transmission.  priorRequest should be
-the request currently on requestStream (if any); newRequest should be the request too be put on 
-the requestStream (if any).  priorRequest will be moved to state kWaitingForResponse; 
+the request currently on requestStream (if any); newRequest should be the request too be put on
+the requestStream (if any).  priorRequest will be moved to state kWaitingForResponse;
 newRequest will be moved to state kTransmittingRequest */
 static void scheduleNewRequest(__CFNetConnection* conn, _CFNetRequest *newRequest, _CFNetRequest *priorRequest, Boolean priorRequestIsNewResponse) {
     Boolean firstRequest = __CFBitIsSet(conn->flags, FIRST_REQUEST_SENT) ? FALSE : TRUE;
-    
+
     // Note that we must schedule first, then open, then signal our requests.  This guarantees that no events are lost
     if ((!priorRequest || __CFBitIsSet(conn->flags, SHOULD_PIPELINE)) && conn->cb->runLoopAndModesArrayForRequest && conn->requestStream) {
         CFArrayRef newRLArray, oldRLArray/*, testArray*/;
@@ -806,7 +806,7 @@ static void scheduleNewRequest(__CFNetConnection* conn, _CFNetRequest *newReques
         oldRLArray = runLoopsAndModesForRequest(conn, priorRequest);
         rescheduleStream(conn->requestStream, oldRLArray, newRLArray);
     }
-    
+
     if (firstRequest) {
         __CFBitSet(conn->flags, FIRST_REQUEST_SENT);
         openConnectionStreams(conn);
@@ -827,7 +827,7 @@ static void scheduleNewRequest(__CFNetConnection* conn, _CFNetRequest *newReques
     }
 }
 
-/* Call from within a lock to change the request scheduled to receive its response.  priorRequest 
+/* Call from within a lock to change the request scheduled to receive its response.  priorRequest
 should be the request currently on responseStream (if any); newRequest should be the request to
 be put on the responseStream (if any).  priorRequest will be moved to state kFinished; newRequest
 will be moved to state kReceivingResponse */
@@ -838,7 +838,7 @@ static void scheduleNewResponse(__CFNetConnection* conn, _CFNetRequest *newReque
         oldRLArray = runLoopsAndModesForRequest(conn, priorRequest);
         rescheduleStream(conn->responseStream, oldRLArray, newRLArray);
     }
-    
+
     if (priorRequest) {
         conn->cb->requestStateChanged(priorRequest->request, kFinished, NULL, (_CFNetConnectionRef)conn, conn->info);
     }
@@ -874,7 +874,7 @@ static void schedulePipelinedTransition(__CFNetConnection *conn, _CFNetRequest *
     }
 }
 
-// Once we invoke the requestStateChanged() callback, the queue could be completely mucked with - 
+// Once we invoke the requestStateChanged() callback, the queue could be completely mucked with -
 // possibly many request could dequeue, and any dequeued request should not be messaged.  So we mark the
 // requests we intend to message, and then keep traversing the list, messaging any that are still there.
 static void sendStateChanged(__CFNetConnection *conn, _CFNetRequest *firstRecipient, int newState, CFStreamError *err) {
@@ -884,7 +884,7 @@ static void sendStateChanged(__CFNetConnection *conn, _CFNetRequest *firstRecipi
         __CFBitSet(req->flags, MARKED_REQUEST);
         req = req->next;
     }
-    
+
     while (!done) {
         req = conn->head;
         while (req) {
@@ -904,7 +904,7 @@ void _CFNetConnectionErrorOccurred(_CFNetConnectionRef arg, CFStreamError *err) 
     _CFNetRequest *req;
     CFAllocatorRef alloc;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
-    
+
     CFRetain(arg);
 
 	_CFNetConnectionLock(conn);
@@ -912,7 +912,7 @@ void _CFNetConnectionErrorOccurred(_CFNetConnectionRef arg, CFStreamError *err) 
     fprintf(stderr, "-- CFNetConnectionErrorOccurred(0x%x, {%d, %d})\n", (int)conn, (int)(err->domain), (int)(err->error));
 #endif
     __CFBitClear(conn->flags, ACCEPTS_NEW_REQUESTS);
-    
+
     /* Orphan all queued requests */
     alloc = CFGetAllocator(conn);
     req = conn->currentResponse;
@@ -933,7 +933,7 @@ void _CFNetConnectionErrorOccurred(_CFNetConnectionRef arg, CFStreamError *err) 
 
 void _CFNetConnectionLost(_CFNetConnectionRef arg) {
     __CFNetConnection* conn = (__CFNetConnection*)arg;
-    
+
     CFRetain(arg);
 
 	_CFNetConnectionLock(conn);
@@ -956,7 +956,7 @@ void _CFNetConnectionLost(_CFNetConnectionRef arg) {
         sendStateChanged(conn, req, kOrphaned, &err);
     }
 	_CFNetConnectionUnlock(conn);
-    
+
     CFRelease(arg);
 }
 
@@ -965,15 +965,15 @@ Boolean _CFNetConnectionDequeue(_CFNetConnectionRef arg, void *req) {
 
     _CFNetRequest *removedRequest = NULL;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
-    
+
     CFRetain(arg);
 
 	_CFNetConnectionLock(conn);
-    
+
 #if defined(LOG_CONNECTIONS)
     fprintf(stderr, "-- CFNetConnectionDequeue(0x%x, 0x%x)\n", (int)conn, (int)req);
 #endif
-    
+
     // Dequeueing is a little tricky.
     //
     // 1. If there is nothing in the queue, don't attempt.
@@ -983,25 +983,25 @@ Boolean _CFNetConnectionDequeue(_CFNetConnectionRef arg, void *req) {
     // 5. If the request appears between current response & current request, it may not be dequeued
     // 6. If the request is the current request, it may be dequeued iff its transmission has not yet begun
     // 7. If the request appears after the current request, it may be dequeued
-	
+
     // 1. If there is nothing in the queue, don't attempt.
     if (conn->head) {
         _CFNetRequest *pre = NULL, *match = conn->head;
         Boolean pastCurrentRequest = FALSE;
         Boolean pastCurrentResponse = FALSE;
         Boolean removeMatch;
-    
+
         while (match && match->request != req) {
             if (match == conn->currentResponse) {
                 pastCurrentResponse = TRUE;
-            } 
+            }
             if (match == conn->currentRequest) {
                 pastCurrentRequest = TRUE;
             }
             pre = match;
             match = match->next;
         }
-    
+
         if (match) {
             if (!pastCurrentResponse) {
                 if (match != conn->currentResponse) {
@@ -1049,26 +1049,26 @@ Boolean _CFNetConnectionDequeue(_CFNetConnectionRef arg, void *req) {
 
 	if (removedRequest)
 		conn->count--;
-	
+
     _CFNetConnectionUnlock(conn);
-    
+
     CFRelease(arg);
-    
+
     return (removedRequest ? TRUE : FALSE);
 }
 
 
 void* _CFNetConnectionGetCurrentRequest(_CFNetConnectionRef arg) {
-    
+
     void* result;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
-    
+
 	_CFNetConnectionLock(conn);
-    
+
     result = conn->currentRequest ? conn->currentRequest->request : NULL;
 
 	_CFNetConnectionUnlock(conn);
-    
+
     return result;
 }
 
@@ -1077,7 +1077,7 @@ int _CFNetConnectionGetQueueDepth(_CFNetConnectionRef arg) {
     int result;
 
 	_CFNetConnectionLock(conn);
-	
+
 	result = conn->count;
 //    if (conn->currentResponse) {
 //        _CFNetRequest *req = conn->currentResponse;
@@ -1102,7 +1102,7 @@ void _CFNetConnectionReplaceRequest(_CFNetConnectionRef arg, void *oldReq, void 
     _CFNetRequest *myNetRequest = NULL;
     Boolean rescheduleRequestStream = FALSE;
     Boolean rescheduleResponseStream = FALSE;
-    
+
     _CFNetConnectionLock(conn);
 
     if (conn->currentRequest && __CFBitIsSet(conn->flags, TRANSMITTING_CURRENT_REQUEST)) {
@@ -1128,7 +1128,7 @@ void _CFNetConnectionReplaceRequest(_CFNetConnectionRef arg, void *oldReq, void 
             newRLArray = NULL;
         }
     }
-    
+
     replaceInList(&conn->head, &conn->tail, oldReq, newReq);
     if (rescheduleRequestStream) {
         rescheduleStream(conn->requestStream, oldRLArray, newRLArray);
@@ -1146,7 +1146,7 @@ void _CFNetConnectionReplaceRequest(_CFNetConnectionRef arg, void *oldReq, void 
 
 
 CFReadStreamRef _CFNetConnectionGetResponseStream(_CFNetConnectionRef arg) {
-    
+
     CFReadStreamRef responseStream = NULL;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
 
@@ -1160,7 +1160,7 @@ CFReadStreamRef _CFNetConnectionGetResponseStream(_CFNetConnectionRef arg) {
 }
 
 CFWriteStreamRef _CFNetConnectionGetRequestStream(_CFNetConnectionRef arg) {
-    
+
     CFWriteStreamRef requestStream = NULL;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
 
@@ -1175,7 +1175,7 @@ CFWriteStreamRef _CFNetConnectionGetRequestStream(_CFNetConnectionRef arg) {
 
 
 void _CFNetConnectionSetAllowsNewRequests(_CFNetConnectionRef arg, Boolean allowRequests) {
-    
+
     __CFNetConnection* conn = (__CFNetConnection*)arg;
 
 	_CFNetConnectionLock(conn);
@@ -1190,7 +1190,7 @@ void _CFNetConnectionSetAllowsNewRequests(_CFNetConnectionRef arg, Boolean allow
 Boolean _CFNetConnectionIsEmpty(_CFNetConnectionRef arg) {
     __CFNetConnection* conn = (__CFNetConnection*)arg;
     Boolean result;
-    
+
 	_CFNetConnectionLock(conn);
     result = (conn->head == NULL);
 	_CFNetConnectionUnlock(conn);
@@ -1198,7 +1198,7 @@ Boolean _CFNetConnectionIsEmpty(_CFNetConnectionRef arg) {
 }
 
 Boolean _CFNetConnectionWillEnqueueRequests(_CFNetConnectionRef arg) {
-    
+
     Boolean result;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
 
@@ -1262,7 +1262,7 @@ void _CFNetConnectionResponseIsComplete(_CFNetConnectionRef arg, void *req) {
     CFRetain(conn);
 
 	_CFNetConnectionLock(conn);
-#if defined(LOG_CONNECTIONS) 
+#if defined(LOG_CONNECTIONS)
     fprintf(stderr, "-- CFNetConnectionResponseIsComplete(0x%x, 0x%x)\n", (int)conn, (int)req);
 #endif
     if (conn->currentResponse && req == conn->currentResponse->request) {
@@ -1285,7 +1285,7 @@ void _CFNetConnectionResponseIsComplete(_CFNetConnectionRef arg, void *req) {
                 } else if (!__CFBitIsSet(conn->flags, SHOULD_PIPELINE) && !__CFBitIsSet(conn->flags, TRANSMITTING_CURRENT_REQUEST)) {
                     // Haven't been transmitting currentRequest; start doing so now
                     // In the non-pipelining case, we must ensure that the former response is completely off the line
-                    // before we start the new request, so we need to call scheduleNewResponse first.  This is a 
+                    // before we start the new request, so we need to call scheduleNewResponse first.  This is a
                     // performance hit we need to work out....
                     didNonPipelinedTransition = TRUE;
                     schedulePipelinedTransition(conn, conn->currentResponse, oldResponse);
@@ -1304,7 +1304,7 @@ void _CFNetConnectionResponseIsComplete(_CFNetConnectionRef arg, void *req) {
 void _CFNetConnectionRequestIsComplete(_CFNetConnectionRef arg, void *req) {
 
     __CFNetConnection* conn = (__CFNetConnection*)arg;
-    
+
     CFRetain(conn);
 
 	_CFNetConnectionLock(conn);
@@ -1340,7 +1340,7 @@ void _CFNetConnectionRequestIsComplete(_CFNetConnectionRef arg, void *req) {
 
 // Gets the connection's current opinion about the request's state.  Calling this will cause the connection to attempt to further the state of its queue, and may cause calls back in to the request.  If the connection knows nothing about the request, it will return kOrphaned, and the calling request should forget any tie to this connection
 int _CFNetConnectionGetState(_CFNetConnectionRef arg, Boolean advanceConnection, void *req) {
-    
+
     int result;
     __CFNetConnection* conn = (__CFNetConnection*)arg;
 
@@ -1368,7 +1368,7 @@ int _CFNetConnectionGetState(_CFNetConnectionRef arg, Boolean advanceConnection,
         } else {
             result = kQueued;
         }
-    
+
     // It's possible that calling receiveResponse actually emptied the
     // queues, so need to make sure head is still good.
     } else if (conn->currentResponse && (req == conn->currentResponse->request)) {
@@ -1395,11 +1395,11 @@ void _CFNetConnectionSchedule(_CFNetConnectionRef arg, void *req, CFRunLoopRef r
 
     __CFNetConnection* conn = (__CFNetConnection*)arg;
     _CFNetRequest *theRequest;
-    
+
     _CFNetConnectionLock(conn);
 
     if (conn->currentRequest && conn->requestStream) {
-        theRequest = nextRealRequest(conn->currentRequest); 
+        theRequest = nextRealRequest(conn->currentRequest);
         if (theRequest->request == req) {
             CFWriteStreamScheduleWithRunLoop(conn->requestStream, rl, mode);
         }
@@ -1425,7 +1425,7 @@ void _CFNetConnectionUnschedule(_CFNetConnectionRef arg, void *req, CFRunLoopRef
 
     if (conn->requestStream) {
         if (conn->currentRequest) {
-            theRequest = nextRealRequest(conn->currentRequest); 
+            theRequest = nextRealRequest(conn->currentRequest);
         } else if (!__CFBitIsSet(conn->flags, SHOULD_PIPELINE) && conn->currentResponse) {
             theRequest = nextRealRequest(conn->currentResponse);
         } else {
@@ -1442,6 +1442,6 @@ void _CFNetConnectionUnschedule(_CFNetConnectionRef arg, void *req, CFRunLoopRef
             CFReadStreamUnscheduleFromRunLoop(conn->responseStream, rl, mode);
         }
     }
-    
+
     _CFNetConnectionUnlock(conn);
 }

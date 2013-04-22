@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 #include <CoreFoundation/CoreFoundation.h>
@@ -45,8 +45,8 @@ typedef struct _CFHTTPConnectionInfo _CFHTTPConnectionInfo;
 #define MIN_STATE_BIT (8)
 #define MAX_STATE_BIT (11)
 #define IN_READ_CALLBACK (12)
-/* A bit of a hack to cover the fact that we may become the current response well before the net connection signals 
-    us with stateChanged to prepareReception.  The problem is that once we become the current response, we get the 
+/* A bit of a hack to cover the fact that we may become the current response well before the net connection signals
+    us with stateChanged to prepareReception.  The problem is that once we become the current response, we get the
     response stream callbacks, which may include the mark (actually intended for the prior response) - we don't want
     that to cause us to send an endEncountered event.  Now, if we receive such an event and we have not yet read the mark,
     we simply do so and continue.  */
@@ -55,14 +55,14 @@ typedef struct _CFHTTPConnectionInfo _CFHTTPConnectionInfo;
 struct _CFHTTPStreamInfo {
     CFOptionFlags flags;
     CFHTTPMessageRef request;
-    CFHTTPMessageRef responseHeaders; 
+    CFHTTPMessageRef responseHeaders;
     CFReadStreamRef requestPayload; // May be NULL
     CFDataRef requestFragment; // Fragmentary data read from requestPayload but not yet written
     long long requestBytesWritten;
 	CFArrayRef peerCertificates; // Certificates received from peer
 	CFArrayRef clientCertificates; // Client certificate chain sent to peer
 	CFNumberRef clientCertificateState; // Holds a SSLClientCertificateState value; see <Security/SecureTransport.h>
-    
+
     _CFNetConnectionRef conn;
     CFReadStreamRef stream; // The stream we returned for this request
     CFRunLoopSourceRef stateChangeSource; // This source is used when we need to wait on an outside state change - either for bytes to come in on the connection, or for some request upstream of us to progress.

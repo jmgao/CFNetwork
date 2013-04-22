@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,21 +17,21 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*
  * Copyright (c) 2000-2004 Apple Computer, Inc. All Rights Reserved.
- * 
+ *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -39,16 +39,16 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 
 /*
- * NTLM client-side authentication engine. 
+ * NTLM client-side authentication engine.
  *
  * In the usual absence of documentation from Microsoft, the "inventors" of this
  * protocol, this module was written using the superb revers engineering documented
- * at 
+ * at
  *
  *     http://davenport.sourceforge.net/ntlm.html#localAuthentication
  */
@@ -63,16 +63,16 @@
 #include <strings.h>
 #include <security_cdsa_utils/cuCdsaUtils.h>
 
-/* 
- * For debugging using fixed server challenge and client nonce. 
+/*
+ * For debugging using fixed server challenge and client nonce.
  */
 #if		DEBUG_FIXED_CHALLENGE
 
 /* these are "test vectors", effectively, from sourceforge */
 /* use pwd SecREt01, host/domain DOMAIN */
-static const unsigned char fixServerChallenge[8] = 
+static const unsigned char fixServerChallenge[8] =
 	{ 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef };
-static const unsigned char fixClientNonce[8] = 
+static const unsigned char fixClientNonce[8] =
 	{ 0xff, 0xff, 0xff, 0x00, 0x11, 0x22, 0x33, 0x44 };
 
 static const unsigned char fixTargetInfo[] = {
@@ -83,7 +83,7 @@ static const unsigned char fixTargetInfo[] = {
 	0x04, 0x00, 0x14, 0x00, 0x64, 0x00, 0x6f, 0x00,
 	0x6d, 0x00, 0x61, 0x00, 0x69, 0x00, 0x6e, 0x00,
 	0x2e, 0x00, 0x63, 0x00, 0x6f, 0x00, 0x6d, 0x00,
-	0x03, 0x00, 0x22, 0x00, 0x73, 0x00, 0x65, 0x00, 
+	0x03, 0x00, 0x22, 0x00, 0x73, 0x00, 0x65, 0x00,
 	0x72, 0x00, 0x76, 0x00, 0x65, 0x00, 0x72, 0x00,
 	0x2e, 0x00, 0x64, 0x00, 0x6f, 0x00, 0x6d, 0x00,
 	0x61, 0x00, 0x69, 0x00, 0x6e, 0x00, 0x2e, 0x00,
@@ -98,7 +98,7 @@ struct NtlmGenerator {
 	CSSM_CSP_HANDLE		mCspHand;
 	NLTM_Which			mNegotiatedVersion;
 	uint32_t			mSentFlags;			/* the flags we sent in first mst */
-};	
+};
 
 static OSStatus _NtlmGeneratePasswordHashes(
 	CFAllocatorRef alloc,
@@ -106,9 +106,9 @@ static OSStatus _NtlmGeneratePasswordHashes(
 	CFStringRef password,
 	CFDataRef* ntlmHash,
 	CFDataRef* lmHash);
-										  
+
 /*
- * Validate type 2 message sent by the server; return interesting fields. 
+ * Validate type 2 message sent by the server; return interesting fields.
  * NOTE we do not deal with the Context field here, which is only used
  * for local authetication.
  */
@@ -122,38 +122,38 @@ static OSStatus ntlmParseServerChallenge(
 	unsigned		*targetInfoLen)		/* optionally RETURNED */
 {
 	int minLength;
-	
+
 	*targetName = NULL;
 	*targetNameLen = 0;
 	*targetInfo = NULL;
 	*targetInfoLen = 0;
-	
+
 	if(serverBlob == NULL) {
 		return NTLM_ERR_PARSE_ERR;
 	}
-	
+
 	minLength = NTLM_SIGNATURE_LEN +
 		sizeof(uint32_t) +			/* msg type */
 		NTLM_SIZEOF_SEC_BUF +		/* target name */
 		sizeof(uint32_t) +			/* flags */
-		NTLM_CHALLENGE_LEN;		
+		NTLM_CHALLENGE_LEN;
 	CFIndex bufLen = CFDataGetLength(serverBlob);
 	if(bufLen < minLength) {
 		dprintf("ntlmParseServerChallenge: bad length\n");
 		return NTLM_ERR_PARSE_ERR;
 	}
-	
+
 	/* do not even think of touching serverBlob after this */
 	const unsigned char *cp = CFDataGetBytePtr(serverBlob);
-	
+
 	/* byte 0: signature */
 	if(memcmp(cp, NTLM_SIGNATURE, NTLM_SIGNATURE_LEN)) {
 		dprintf("ntlmParseServerChallenge: signature mismatch\n");
 		return NTLM_ERR_PARSE_ERR;
 	}
-	
+
 	const unsigned char *currCp = cp + NTLM_SIGNATURE_LEN;
-	
+
 	/* byte 8: message type */
 	uint32_t msgType = deserializeUint32(currCp);
 	if(msgType != NTLM_MSG_MARKER_TYPE2) {
@@ -161,7 +161,7 @@ static OSStatus ntlmParseServerChallenge(
 		return NTLM_ERR_PARSE_ERR;
 	}
 	currCp += sizeof(uint32_t);
-	
+
 	/* byte 12: target name, security buffer */
 	const unsigned char *sbData;
 	uint16_t sbLen;
@@ -173,11 +173,11 @@ static OSStatus ntlmParseServerChallenge(
 	*targetNameLen = sbLen;
 	memmove(*targetName, sbData, sbLen);
 	currCp += NTLM_SIZEOF_SEC_BUF;
-	
+
 	/* byte 20: flags */
 	*serverFlags = deserializeUint32(currCp);
 	currCp += sizeof(uint32_t);
-	
+
 	/* byte 24: challenge */
 	#if		DEBUG_FIXED_CHALLENGE
 	memmove(challenge, fixServerChallenge, NTLM_CHALLENGE_LEN);
@@ -185,27 +185,27 @@ static OSStatus ntlmParseServerChallenge(
 	memmove(challenge, currCp, NTLM_CHALLENGE_LEN);
 	#endif
 	currCp += NTLM_CHALLENGE_LEN;
-	
+
 	/* remaining fields optional */
 	const unsigned char *endOfBuf = cp + bufLen;
 	assert(endOfBuf >= currCp);
 	if(endOfBuf == currCp) {
 		return noErr;
 	}
-	
+
 	if(endOfBuf < (currCp + NTLM_SIZEOF_SEC_BUF)) {
 		/* not enough left for even one security buf; ignore */
 		return noErr;
 	}
-	
+
 	/* byte 32: context: skip */
 	currCp += NTLM_SIZEOF_SEC_BUF;
-	
+
 	if(endOfBuf < (currCp + NTLM_SIZEOF_SEC_BUF)) {
 		/* not enough left for target info security buf; ignore */
 		return noErr;
 	}
-	
+
 	/* byte 40: target info */
 	ortn = ntlmParseSecBuffer(currCp, cp, bufLen, &sbData, &sbLen);
 	if(ortn) {
@@ -223,22 +223,22 @@ static OSStatus ntlmParseServerChallenge(
 	return noErr;
 }
 
-/* 
+/*
  * Create NTLMv2 responses (both NTLM and LM).
  */
 static OSStatus ntlmGenerateNtlmV2Response(
-	CSSM_CSP_HANDLE cspHand, 
-	
+	CSSM_CSP_HANDLE cspHand,
+
 	/* from app */
-	CFStringRef		domain,		
+	CFStringRef		domain,
 	CFStringRef		userName,
 	CFDataRef		ntlmHash,
-	
+
 	/* from server */
 	const unsigned char *serverChallenge,
 	const unsigned char *targetInfo,
 	unsigned			targetInfoLen,
-	
+
 	/* returned */
 	unsigned char	*lmV2Response,		// caller supplied, NTLM_LM_RESPONSE_LEN bytes
 	unsigned char   **ntlmv2Response,   // mallocd and RETURNED
@@ -251,19 +251,19 @@ static OSStatus ntlmGenerateNtlmV2Response(
 	#else
 	ntlmRand(NTLM_CLIENT_NONCE_LEN, challenge);
 	#endif
-	
+
 	/* NTLM password hash */
 	unsigned char ntlmPwdHash[NTLM_DIGEST_LENGTH];
 //	ntlmPasswordHash(password, ntlmPwdHash);
 	memmove(ntlmPwdHash, CFDataGetBytePtr(ntlmHash), sizeof(ntlmPwdHash));
-	
+
 	/* uppercase(userName | domain) */
 	CFMutableStringRef userDomain = CFStringCreateMutableCopy(NULL, 0, userName);
 	if(domain != NULL) {
 		CFStringAppend(userDomain, domain);
 	}
 	CFStringUppercase(userDomain, NULL);
-	
+
 	/* declare some locals prior to any gotos */
 	unsigned char *ucode = NULL;
 	unsigned ucodeLen;
@@ -276,7 +276,7 @@ static OSStatus ntlmGenerateNtlmV2Response(
 	CFMutableDataRef catBlob = NULL;
 	unsigned ntlmV2BlobLen;
 	unsigned char blobSig[4] = {0x01, 0x01, 0x00, 0x00};
-	
+
 	/* HMAC(passwordHash, uppercase(userName | domain)) */
 	ntlmStringToLE(userDomain, &ucode, &ucodeLen);
 	OSStatus ortn = ntlmHmacMD5(cspHand, ntlmPwdHash, NTLM_DIGEST_LENGTH,
@@ -284,7 +284,7 @@ static OSStatus ntlmGenerateNtlmV2Response(
 	if(ortn) {
 		goto errOut;
 	}
-	
+
 	/* HMAC(ntlmV2Hash, serverChallenge | clientChallenge) */
 	memmove(macText2, serverChallenge, NTLM_CHALLENGE_LEN);
 	memmove(macText2 + NTLM_CHALLENGE_LEN, challenge, NTLM_CLIENT_NONCE_LEN);
@@ -297,10 +297,10 @@ static OSStatus ntlmGenerateNtlmV2Response(
 	/* LMv2 response := challengeMac | clientChallenge */
 	memmove(lmV2Response, challengeMac, NTLM_DIGEST_LENGTH);
 	memmove(lmV2Response + NTLM_DIGEST_LENGTH, challenge, NTLM_CLIENT_NONCE_LEN);
-	
+
 	/* Prepare the NTLMv2 'blob' */
 	ntlmV2Blob = CFDataCreateMutable(NULL, 0);
-	
+
 	/* 0: 0x01010000 */
 	CFDataAppendBytes(ntlmV2Blob, blobSig, 4);
 	/* 4: reserved, zeroes */
@@ -315,8 +315,8 @@ static OSStatus ntlmGenerateNtlmV2Response(
 	CFDataAppendBytes(ntlmV2Blob, targetInfo, targetInfoLen);
 	/* *: unknown, zeroes */
 	appendUint32(ntlmV2Blob, 0);
-	
-	/* keep that blob; it'll go directly into the response. Now cook up 
+
+	/* keep that blob; it'll go directly into the response. Now cook up
 	 * another one, the concatentation of the server challenge with the
 	 * ntlmV2Blob */
 	ntlmV2BlobLen = CFDataGetLength(ntlmV2Blob);
@@ -331,7 +331,7 @@ static OSStatus ntlmGenerateNtlmV2Response(
 	if(ortn) {
 		goto errOut;
 	}
-	
+
 	/* Finally, NTLMv2 response := (blobMac | ntlmV2Blob) */
 	ntlmv2Resp = (unsigned char *)malloc(NTLM_DIGEST_LENGTH + ntlmV2BlobLen);
 	memmove(ntlmv2Resp, blobMac, NTLM_DIGEST_LENGTH);
@@ -360,7 +360,7 @@ OSStatus NtlmGeneratorCreate(
 	NLTM_Which			which,
 	NtlmGeneratorRef	*ntlmGen)			/* RETURNED */
 {
-	struct NtlmGenerator *gen = 
+	struct NtlmGenerator *gen =
 		(struct NtlmGenerator *)malloc(sizeof(struct NtlmGenerator));
 	if(gen == NULL) {
 		return memFullErr;
@@ -375,7 +375,7 @@ OSStatus NtlmGeneratorCreate(
 	*ntlmGen = gen;
 	return noErr;
 }
-	
+
 void NtlmGeneratorRelease(
 	NtlmGeneratorRef	ntlmGen)
 {
@@ -398,10 +398,10 @@ OSStatus NtlmCreateClientRequest(
 	}
 	/* byte 0: signature, NULL terminated */
 	CFDataAppendBytes(req, (UInt8 *)NTLM_SIGNATURE, NTLM_SIGNATURE_LEN);
-		 
+
 	/* byte 8: message type */
 	appendUint32(req, NTLM_MSG_MARKER_TYPE1);
-	
+
 	/* byte 12: the standard flags we send - we're wide open to all types */
 	/* FIXME isn't there a way to tell the server we support NTLMv2? */
 	ntlmGen->mSentFlags = NTLM_NegotiateUnicode |
@@ -413,20 +413,20 @@ OSStatus NtlmCreateClientRequest(
 		ntlmGen->mSentFlags |= NTLM_NegotiateNTLM2Key;
 	}
 	appendUint32(req, ntlmGen->mSentFlags);
-	
+
 	/* byte 16: optional supplied domain: not needed */
 	CFIndex dex;
 	appendSecBuf(req, 0, &dex);
-		
+
 	/* byte 24: optional supplied workstation: not needed */
 	appendSecBuf(req, 0, &dex);
 
 	*clientRequest = req;
 	return noErr;
 }
-	
-/* 
- * The meat & potatoes: given a server type 2 message, cook up a type 3 response. 
+
+/*
+ * The meat & potatoes: given a server type 2 message, cook up a type 3 response.
  */
 OSStatus NtlmCreateClientResponse(
 	NtlmGeneratorRef	ntlmGen,
@@ -439,18 +439,18 @@ OSStatus NtlmCreateClientResponse(
 	CFDataRef ntlmHash = NULL;
 	CFDataRef lmHash = NULL;
 	OSStatus result = _NtlmGeneratePasswordHashes(kCFAllocatorDefault, ntlmGen, password, &ntlmHash, &lmHash);
-	
+
 	if (result == noErr) {
-		
+
 		result = _NtlmCreateClientResponse(ntlmGen, serverBlob, domain, userName, ntlmHash, lmHash, clientResponse);
 	}
-	
+
 	if (ntlmHash)
 		CFRelease(ntlmHash);
-	
+
 	if (lmHash)
 		CFRelease(lmHash);
-	
+
 	return result;
 }
 
@@ -465,7 +465,7 @@ OSStatus _NtlmCreateClientResponse(
 {
 	OSStatus		ortn;
 	uint32_t		serverFlags;
-	unsigned char   serverChallenge[NTLM_CHALLENGE_LEN];  
+	unsigned char   serverChallenge[NTLM_CHALLENGE_LEN];
 	unsigned char   *targetName = NULL;
 	unsigned		targetNameLen = 0;
 	unsigned char   *targetInfo = NULL;
@@ -487,7 +487,7 @@ OSStatus _NtlmCreateClientResponse(
 	CFIndex			workstationNameOffset;
 	CFIndex			nullDex;
 	unsigned char   pwdHash[NTLM_DIGEST_LENGTH];
-	
+
 	ortn = ntlmParseServerChallenge(serverBlob, &serverFlags, serverChallenge,
 		&targetName, &targetNameLen,
 		&targetInfo, &targetInfoLen);
@@ -500,13 +500,13 @@ OSStatus _NtlmCreateClientResponse(
 	bool lm2Key  = (serverFlags & NTLM_NegotiateNTLM2Key) ? true : false;
 	bool unicode = (serverFlags & NTLM_NegotiateUnicode) ? true : false;
 	/* any others? */
-	
+
 	CFMutableDataRef clientBuf = CFDataCreateMutable(NULL, 0);
 	if(clientBuf == NULL) {
 		ortn = memFullErr;
 		goto errOut;
 	}
-	
+
 	if (domain) {
 		domain = CFStringCreateMutableCopy(NULL, 0, domain);
 		if (domain)
@@ -516,13 +516,13 @@ OSStatus _NtlmCreateClientResponse(
 			goto errOut;
 		}
 	}
-	
+
 	/* byte 0: signature, NULL terminated */
 	CFDataAppendBytes(clientBuf, (UInt8 *)NTLM_SIGNATURE, NTLM_SIGNATURE_LEN);
-		 
+
 	/* byte 8: message type */
 	appendUint32(clientBuf, NTLM_MSG_MARKER_TYPE3);
-	
+
 	/* LM and NTLM responses */
 	if( (targetInfo != NULL) &&							// server is NTLMv2 capable
 	    (targetInfoLen != 0) &&							// ditto
@@ -531,17 +531,17 @@ OSStatus _NtlmCreateClientResponse(
 		/*
 		 * NTLMv2
 		 */
-		ortn = ntlmGenerateNtlmV2Response(ntlmGen->mCspHand, 
+		ortn = ntlmGenerateNtlmV2Response(ntlmGen->mCspHand,
 			domain, userName, ntlmHash,
 			serverChallenge, targetInfo, targetInfoLen,
 			lmResp, &ntlmResponsePtr, &ntlmResponseLen);
 		if(ortn) {
 			goto errOut;
 		}
-		
-		/* 
+
+		/*
 		 * Write security buffers.
-		 * 
+		 *
 		 * byte 12: LM response
 		 * byte 20: NTLM response
 		 */
@@ -557,22 +557,22 @@ OSStatus _NtlmCreateClientResponse(
 			#else
 			ntlmRand(NTLM_CLIENT_NONCE_LEN, lmResp);
 			#endif
-			memset(lmResp + NTLM_CLIENT_NONCE_LEN, 0, 
+			memset(lmResp + NTLM_CLIENT_NONCE_LEN, 0,
 				NTLM_LM_RESPONSE_LEN - NTLM_CLIENT_NONCE_LEN);
-			
+
 			/* session nonce: server challenge | client nonce */
 			unsigned char sessionNonce[NTLM_CHALLENGE_LEN + NTLM_CLIENT_NONCE_LEN];
 			memmove(sessionNonce, serverChallenge, NTLM_CHALLENGE_LEN);
 			memmove(sessionNonce + NTLM_CHALLENGE_LEN, lmResp, NTLM_CLIENT_NONCE_LEN);
-			
+
 			/* NTLM2 session hash: the first 8 bytes of MD5(sessionNonce) */
 			unsigned char sessionHash[NTLM_DIGEST_LENGTH];
 			md5Hash(sessionNonce, NTLM_CHALLENGE_LEN + NTLM_CLIENT_NONCE_LEN, sessionHash);
-			
+
 			/* standard password hash */
 //			ntlmPasswordHash(password, pwdHash);
 			memmove(pwdHash, CFDataGetBytePtr(ntlmHash), sizeof(pwdHash));
-			
+
 			/* NTLM response: DES with three different keys */
 			ortn = ntlmResponse(ntlmGen->mCspHand, pwdHash, sessionHash, ntlmResp);
 			if(ortn) {
@@ -582,9 +582,9 @@ OSStatus _NtlmCreateClientResponse(
 			ntlmGen->mNegotiatedVersion = NW_NTLM2;
 		}
 		else if(ntlmGen->mWhich & NW_NTLM1) {
-			/* 
+			/*
 			 * LM response - the old style 2-DES "password hash" applied
-			 * the the server's challenge 
+			 * the the server's challenge
 			 */
 //			ortn = lmPasswordHash(ntlmGen->mCspHand, password, pwdHash);
 //			if(ortn) {
@@ -592,15 +592,15 @@ OSStatus _NtlmCreateClientResponse(
 //				goto errOut;
 //			}
 			memmove(pwdHash, CFDataGetBytePtr(lmHash), sizeof(pwdHash));
-			
+
 			ortn = ntlmResponse(ntlmGen->mCspHand, pwdHash, serverChallenge, lmResp);
 			if(ortn) {
 				dprintf("***Error on ntlmResponse (1)\n");
 				goto errOut;
 			}
-			
+
 			/*
-			 * NTLM response: md4 password hash, DES with three different keys 
+			 * NTLM response: md4 password hash, DES with three different keys
 			 */
 //			ntlmPasswordHash(password, pwdHash);
 			memmove(pwdHash, CFDataGetBytePtr(ntlmHash), sizeof(pwdHash));
@@ -616,12 +616,12 @@ OSStatus _NtlmCreateClientResponse(
 			dprintf("***NTLM protocol mismatch\n");
 			ortn = NTLM_ERR_PROTOCOL_MISMATCH;
 			goto errOut;
-		
+
 		}
-		
-		/* 
+
+		/*
 		 * Write security buffers.
-		 * 
+		 *
 		 * byte 12: LM response
 		 * byte 20: NTLM response
 		 */
@@ -630,8 +630,8 @@ OSStatus _NtlmCreateClientResponse(
 		ntlmResponsePtr = ntlmResp;
 		ntlmResponseLen = NTLM_LM_RESPONSE_LEN;
 	}   /* not NTLMv2 */
-	
-	/* 
+
+	/*
 	 * convert domain and user as appropriate
 	 * byte 28: domain (server) name
 	 */
@@ -653,7 +653,7 @@ OSStatus _NtlmCreateClientResponse(
 		goto errOut;
 	}
 	appendSecBuf(clientBuf, userNameFlatLen, &userNameOffset);
-	
+
 	/* byte 44: hostname */
 	ortn = ntlmHostName(unicode, &workstationName, &workstationNameLen);
 	if(ortn) {
@@ -661,10 +661,10 @@ OSStatus _NtlmCreateClientResponse(
 		goto errOut;
 	}
 	appendSecBuf(clientBuf, workstationNameLen, &workstationNameOffset);
-	
+
 	/* byte 52: session key (whatever that is): optional, empty here */
 	appendSecBuf(clientBuf, 0, &nullDex);
-	
+
 	/* byte 60: negotiated flags */
 	appendUint32(clientBuf, ntlmGen->mSentFlags & serverFlags);
 
@@ -679,10 +679,10 @@ OSStatus _NtlmCreateClientResponse(
 		secBufOffset(clientBuf, domainNameOffset);
 		CFDataAppendBytes(clientBuf, domainNameFlat, domainNameFlatLen);
 	}
-	
+
 	secBufOffset(clientBuf, userNameOffset);
 	CFDataAppendBytes(clientBuf, userNameFlat, userNameFlatLen);
-	
+
 	secBufOffset(clientBuf, workstationNameOffset);
 	CFDataAppendBytes(clientBuf, workstationName, workstationNameLen);
 
@@ -705,7 +705,7 @@ errOut:
 	}
 	return ortn;
 }
-	
+
 /* replacement for NtlmNegotiatedNtlm2: returns NW_NTLM1Only, NW_NTLM2Only,
  * or NW_NTLMv2Only */
 NLTM_Which NtlmGetNegotiatedVersion(
@@ -723,16 +723,16 @@ OSStatus _NtlmGeneratePasswordHashes(
 {
 	OSStatus result = noErr;
 	unsigned char hash[NTLM_DIGEST_LENGTH];
-	
+
 	ntlmPasswordHash(password, hash);
-	
+
 	*ntlmHash = CFDataCreate(alloc, hash, sizeof(hash));
-	
+
 	result = lmPasswordHash(ntlm->mCspHand, password, hash);
-	
+
 	if (result == noErr)
 		*lmHash = CFDataCreate(alloc, hash, sizeof(hash));
-	
+
 	return result;
 }
 
@@ -743,16 +743,16 @@ OSStatus NtlmGeneratePasswordHashes(
 	CFDataRef* lmHash)
 {
 	NtlmGeneratorRef ntlm = NULL;
-	
+
 	OSStatus result = NtlmGeneratorCreate(NW_Any, &ntlm);
-	
+
 	if (result == noErr) {
 		result = _NtlmGeneratePasswordHashes(alloc, ntlm, password, ntlmHash, lmHash);
 	}
-	
+
 	if (ntlm)
 		NtlmGeneratorRelease(ntlm);
-	
+
 	return result;
 }
 

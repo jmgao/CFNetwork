@@ -123,7 +123,7 @@ CHOWN = /usr/sbin/chown
 TAR = /usr/bin/tar
 TOUCH = /usr/bin/touch
 STRIP = /usr/bin/strip
-INTERFACER = /AppleInternal/Developer/Tools/Interfacer 
+INTERFACER = /AppleInternal/Developer/Tools/Interfacer
 endif
 
 #
@@ -157,7 +157,7 @@ ARCH_FLAGS = -march=i386
 endif
 
 ifeq "$(PLATFORM)" "Linux"
-ARCH_FLAGS = 
+ARCH_FLAGS =
 endif
 
 ifeq "$(USER)" ""
@@ -276,7 +276,7 @@ profile: prebuild profile-build
 #    test		invoke items in Tests subdirectory
 
 #--------------------------------------------------------------------------------
-# INSTALL 
+# INSTALL
 #--------------------------------------------------------------------------------
 
 installsrc:
@@ -377,7 +377,7 @@ endif
 endif
 
 #--------------------------------------------------------------------------------
-# CLEAN 
+# CLEAN
 #--------------------------------------------------------------------------------
 
 clean: clean_before clean_builtin clean_after
@@ -412,7 +412,7 @@ endif
 endif
 
 #--------------------------------------------------------------------------------
-# PREBUILD 
+# PREBUILD
 #--------------------------------------------------------------------------------
 
 prebuild: prebuild_before prebuild_setup prebuild_headers prebuild_after
@@ -498,7 +498,7 @@ ifeq "$(PLATFORM)" "CYGWIN"
 endif
 
 # This is the line from a CFNetwork build in PB
-#    /AppleInternal/Developer/Tools/Interfacer  -masterInterfaces "/AppleInternal/Carbon/interfaces/"  -cacheFolder "/Volumes/Whopper/symroots/CFNetwork.build/CFNetwork.build/InterfacerCache/"   -c -rez -framework "CFNetwork"  -p -generated "c=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/Headers/"  -generatedPriv "c=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/PrivateHeaders/"  -generated "rez=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/Headers/"  -generatedPriv "rez=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/PrivateHeaders/"  -frameworkInterfaces /Volumes/Whale/trey/CFNetwork-Windows/Interfaces/ -installMasterInterfaces /tmp/CFNetwork.dst/AppleInternal/Carbon/interfaces/ 
+#    /AppleInternal/Developer/Tools/Interfacer  -masterInterfaces "/AppleInternal/Carbon/interfaces/"  -cacheFolder "/Volumes/Whopper/symroots/CFNetwork.build/CFNetwork.build/InterfacerCache/"   -c -rez -framework "CFNetwork"  -p -generated "c=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/Headers/"  -generatedPriv "c=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/PrivateHeaders/"  -generated "rez=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/Headers/"  -generatedPriv "rez=/Volumes/Whopper/symroots/CFNetwork.framework/Versions/A/PrivateHeaders/"  -frameworkInterfaces /Volumes/Whale/trey/CFNetwork-Windows/Interfaces/ -installMasterInterfaces /tmp/CFNetwork.dst/AppleInternal/Carbon/interfaces/
 
 
 prebuild_copy_headers:
@@ -515,7 +515,7 @@ endif
 
 
 #--------------------------------------------------------------------------------
-# BUILD 
+# BUILD
 #--------------------------------------------------------------------------------
 
 # ??? should use VPATH, should use generic rules
@@ -585,7 +585,7 @@ build-compile:
 	    done; \
 	    exit $$cumulativeError
 
-ifeq "$(CPP_FILES)" "" 
+ifeq "$(CPP_FILES)" ""
 LINKER_CMD = $(CC)
 else
 LINKER_CMD = $(CPLUSPLUS)

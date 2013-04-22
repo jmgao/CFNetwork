@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*	CFHTTPMessage.c
@@ -196,7 +196,7 @@ static void __CFHTTPMessageDeallocate(CFTypeRef cf) {
     if (req->_lastKey) CFRelease(req->_lastKey);
 }
 
-CONST_STRING_DECL(kCFHTTPVersion1_0, "HTTP/1.0")  
+CONST_STRING_DECL(kCFHTTPVersion1_0, "HTTP/1.0")
 CONST_STRING_DECL(kCFHTTPVersion1_1, "HTTP/1.1")
 CONST_STRING_DECL(kCFHTTPRedirectionResponse,"kCFHTTPRedirectionResponse")
 CONST_STRING_DECL(kCFStreamPropertyHTTPRequest,"kCFStreamPropertyHTTPRequest")
@@ -225,7 +225,7 @@ static CFTypeID __kCFHTTPMessageTypeID = _kCFRuntimeNotATypeID;
 
 static void
 _HTTPMessageRegisterClass(void) {
-	
+
 	static const CFRuntimeClass __CFHTTPMessageClass = {
 		0,
 		"CFHTTPMessage",
@@ -234,10 +234,10 @@ _HTTPMessageRegisterClass(void) {
 		__CFHTTPMessageDeallocate,
 		NULL,      // equal
 		NULL,      // hash
-		NULL,      // 
+		NULL,      //
 		__CFHTTPMessageCopyDescription
 	};
-	
+
 
 	// On Windows CFSTR is a function call, not compiler supported, so we init this table ourselves
 #if defined(__WIN32__)
@@ -252,18 +252,18 @@ _HTTPMessageRegisterClass(void) {
 
 
 CFTypeID CFHTTPMessageGetTypeID(void) {
-	
+
     _CFDoOnce(&gHTTPMessageClassRegistration, _HTTPMessageRegisterClass);
-    
+
     return __kCFHTTPMessageTypeID;
 }
 
 #if defined(__WIN32__)
 extern void _CFHTTPMessageCleanup(void) {
-	
+
 	// **FIXME** This is not protected versus the call to register.
 	// **FIXME** Broken with changes for shrinking DATA section
-	
+
     if (__kCFHTTPMessageTypeID != _kCFRuntimeNotATypeID) {
         int i;
         for (i = 0; i < kHTTPMessageNumItems; i++) {
@@ -340,7 +340,7 @@ UInt8 *_CFURLPortionForRequest(CFAllocatorRef alloc, CFURLRef url, Boolean useCo
         CFURLGetBytes(absURL, (*buf)+1, length);
     }
     urlBytes = (*buf)+1;
-    
+
     if (!useCompleteURL) {
         // First byte is the byte of the path....
         CFRange pathWithSeparators;
@@ -353,7 +353,7 @@ UInt8 *_CFURLPortionForRequest(CFAllocatorRef alloc, CFURLRef url, Boolean useCo
     } else {
         urlRg.location = 0;
     }
-    
+
     // Less the fragment. 3022146. - REW
     fragRg = CFURLGetByteRangeForComponent(absURL, kCFURLComponentFragment, NULL);
     if (fragRg.location == -1) {
@@ -372,7 +372,7 @@ static CFStringRef createRequestLine(CFAllocatorRef alloc, CFStringRef method, C
     UInt8 buf[512], *urlBytes = buf;
     UInt8 *urlPortion;
     Boolean freeBytes = FALSE;
-    
+
     line = CFStringCreateMutableCopy(alloc, 0, method);
     CFStringAppendCString(line, " ", kCFStringEncodingASCII);
 
@@ -477,7 +477,7 @@ CFHTTPMessageRef CFHTTPMessageCreateResponse(CFAllocatorRef allocator, int statu
     if (newResponse) {
         newResponse->_flags |= IS_RESPONSE;
         // record the status code, masking out any illegal bits in case the caller passed a status code too large
-        newResponse->_flags = (newResponse->_flags & ~STATUS_MASK) | (statusCode & STATUS_MASK);	
+        newResponse->_flags = (newResponse->_flags & ~STATUS_MASK) | (statusCode & STATUS_MASK);
         newResponse->_firstLine = createResponseLine(allocator, statusCode, statusDescription, httpVersion);
     }
     return newResponse;
@@ -506,20 +506,20 @@ Boolean CFHTTPMessageIsRequest(CFHTTPMessageRef message) {
 
 /* extern */
 CFHTTPAuthenticationRef _CFHTTPMessageGetAuthentication(CFHTTPMessageRef message, Boolean proxy) {
-	
+
     return proxy ? message->_proxyAuth : message->_auth;
 }
 
 
 void _CFHTTPMessageSetAuthentication(CFHTTPMessageRef message, CFHTTPAuthenticationRef auth, Boolean proxy) {
-	
+
 	CFHTTPAuthenticationRef* ptr = proxy ? &(message->_proxyAuth) : &(message->_auth);
-	
+
     CFRetain(auth);
-	
+
 	if (*ptr)
 		CFRelease(*ptr);
-	
+
 	*ptr = auth;
 }
 
@@ -585,7 +585,7 @@ CFStringRef _CFCapitalizeHeader(CFStringRef headerString) {
     Boolean useUniCharPtr = FALSE;
     Boolean shouldCapitalize = TRUE;
     Boolean somethingChanged = FALSE;
-    
+
     for (i = 0; i < len; i ++) {
         UniChar ch = CFStringGetCharacterAtIndex(headerString, i);
         Boolean replace = FALSE;
@@ -598,21 +598,21 @@ CFStringRef _CFCapitalizeHeader(CFStringRef headerString) {
         }
         if (replace) {
             if (!somethingChanged) {
-                
+
 				CFIndex converted = 0;
-				
+
 				somethingChanged = TRUE;
-				
+
 				charPtr = _CFStringGetOrCreateCString(alloc, headerString, NULL, &converted, kCFStringEncodingISOLatin1);
-				
+
                 if (converted == len) {
                     // Can be encoded in ISOLatin1
                     useUniCharPtr = FALSE;
                 } else {
                     useUniCharPtr = TRUE;
-					
+
 					CFAllocatorDeallocate(alloc, charPtr);
-					
+
 					uniCharPtr = (UniChar*)_CFStringGetOrCreateCString(alloc, headerString, NULL, &converted, kCFStringEncodingUnicode);
                 }
             }
@@ -663,10 +663,10 @@ extern void _CFHTTPMessageSetHeader(CFHTTPMessageRef msg, CFStringRef header, CF
     }
     else {
         if (!CFDictionaryContainsKey(msg->_headers, header)) {
-            
+
             CFIndex count = CFArrayGetCount(msg->_headerOrder);
             CFRange rg = CFRangeMake(((position >= 0) && (position < count)) ? position : count, 0);
-            
+
             if (count == 16) {
                 CFTypeRef temp = CFArrayCreateMutableCopy(CFGetAllocator(msg), 0, msg->_headerOrder);
                 CFRelease(msg->_headerOrder);
@@ -675,11 +675,11 @@ extern void _CFHTTPMessageSetHeader(CFHTTPMessageRef msg, CFStringRef header, CF
                 CFRelease(msg->_headers);
                 msg->_headers = (CFMutableDictionaryRef)temp;
             }
-                
-            
+
+
             CFArrayReplaceValues(msg->_headerOrder, rg, (const void**)(&header), 1);
         }
-        
+
         CFDictionarySetValue(msg->_headers, header, value);
     }
 }
@@ -696,7 +696,7 @@ extern CFDataRef _CFHTTPMessageCopySerializedHeaders(CFHTTPMessageRef msg, Boole
     CFMutableStringRef headers;
     CFDataRef result;
     unsigned i,c;
-    
+
     if ((msg->_flags & IS_RESPONSE) != 0 || !forProxy) {
         headers = CFStringCreateMutableCopy(allocator, 0, msg->_firstLine);
     } else {
@@ -749,14 +749,14 @@ Boolean CFHTTPMessageIsHeaderComplete(CFHTTPMessageRef message) {
 /*********************/
 
 /* extern */ Boolean _CFHTTPMessageIsGetMethod(CFHTTPMessageRef msg) {
-	
+
 	if (!msg->_method) {
-		
+
 		CFStringRef method = CFHTTPMessageCopyRequestMethod(msg);
 		if (method)
 			CFRelease(method);
 	}
-	
+
 	return (msg->_flags & IS_GET_METHOD) ? TRUE : FALSE;
 }
 
@@ -764,7 +764,7 @@ Boolean CFHTTPMessageIsHeaderComplete(CFHTTPMessageRef message) {
 CFStringRef CFHTTPMessageCopyRequestMethod(CFHTTPMessageRef request) {
 //    __CFGenericValidateType(request, CFHTTPMessageGetTypeID());
 //    CFAssert2(((request->_flags & IS_RESPONSE) == 0), __kCFLogAssertion, "%s(): message 0x%x is an HTTP response, not a request", __PRETTY_FUNCTION__, request);
-    
+
     if (!request->_method) {
         CFRange rg;
         if (request->_firstLine && CFStringFindWithOptions(request->_firstLine, _kCFHTTPMessageSpace, CFRangeMake(0, CFStringGetLength(request->_firstLine)), 0, &rg)) {
@@ -777,7 +777,7 @@ CFStringRef CFHTTPMessageCopyRequestMethod(CFHTTPMessageRef request) {
     }
     if (request->_method)
         return CFRetain(request->_method);
-        
+
     return NULL;
 }
 
@@ -833,7 +833,7 @@ static const UInt8 *parseHTTPVersion(const UInt8 *bytes, CFIndex len, Boolean co
     } else if (!(bytes[0] == 'H' && bytes[1] == 'T' && bytes[2] == 'T' && bytes[3] == 'P' &&  bytes[4] == '/')) {
         // Don't have the prefix "HTTP/"
         return NULL;
-    } 
+    }
     for (currentByte = bytes+5; currentByte < lastByte; currentByte ++) {
         UInt8 ch = *currentByte;
         if (ch <= '9' && ch >= '0') {
@@ -916,7 +916,7 @@ static const UInt8 *_extractRequestFirstLine(CFHTTPMessageRef request, const UIn
     const UInt8 *methodEnd = NULL, *urlEnd = NULL, *versionEnd = NULL;
     Boolean fail = FALSE, incomplete = FALSE;
     UInt32 delim = DELIM_CRLF;
-    
+
     // Look for the method
     for (current = bytes; current < end; current ++) {
         UInt8 ch = *current;
@@ -948,12 +948,12 @@ static const UInt8 *_extractRequestFirstLine(CFHTTPMessageRef request, const UIn
         request->_url = CFURLCreateWithBytes(CFGetAllocator(request), methodEnd+1, urlEnd - methodEnd - 1, kCFStringEncodingUTF8, NULL);
         if (!request->_url) {
             // parse error
-            return NULL; 
+            return NULL;
         }
     } else {
         return bytes;
     }
-    
+
     versionEnd = parseHTTPVersion(current, end-current, FALSE);
     if (!versionEnd) { // parse error
         fail = TRUE;
@@ -974,7 +974,7 @@ static const UInt8 *_extractRequestFirstLine(CFHTTPMessageRef request, const UIn
             // Need just one more byte
             incomplete = TRUE;
         }
-    }    
+    }
     if (fail || incomplete) {
         CFRelease(request->_url);
         request->_url = NULL;
@@ -987,7 +987,7 @@ static const UInt8 *_extractRequestFirstLine(CFHTTPMessageRef request, const UIn
 }
 
 static inline const UInt8 *_findEOL(CFHTTPMessageRef response, const UInt8 *bytes, CFIndex len) {
-    
+
     // According to the HTTP specification EOL is defined as
     // a CRLF pair.  Unfortunately, some servers will use LF
     // instead.  Worse yet, some servers will use a combination
@@ -997,11 +997,11 @@ static inline const UInt8 *_findEOL(CFHTTPMessageRef response, const UInt8 *byte
     //
     // It returns NULL if EOL is not found or it will return
     // a pointer to the first terminating character.
-    
+
     const UInt8* result = memchr(bytes, '\n', len);
     if (!result)
         result = memchr(bytes, '\r', len - 1);  // NOTE (len - 1) in order to prevent spanning CRLF.
-    
+
     return result;
 }
 
@@ -1015,40 +1015,40 @@ static Boolean _parseHeadersFromData(CFHTTPMessageRef message) {
     const UInt8* end = start + CFDataGetLength(message->_data);
 
     if (!message->_firstLine) {
-        
+
         const UInt8* newStart;
-        
+
         // NOTE this is not using CFHTTPMessageIsRequest in order
         // to avoid the function dispatch.
         if (message->_flags & IS_RESPONSE)
             newStart = _extractResponseStatusLine(message, start, end - start);
         else
             newStart = _extractRequestFirstLine(message, start, end - start);
-            
+
         if (newStart == start)
             return TRUE;
-            
+
         if (!newStart)
             return FALSE;
-            
+
         start = newStart;
     }
-    
+
     while ((start != end) && !(message->_flags & HEADERS_COMPLETE)) {
-        
+
         UInt8 c;
         const UInt8* eov;	// End of value?
         const UInt8* eol = _findEOL(message, start, end - start);
-        
+
         if (!eol)
             break;
-        
+
         // Make end-of-value point to the character just before
         // the first eol marker.
         eov = eol - 1;
         if ((*eov == '\r') && (*eol == '\n'))
             eov--;
-        
+
         // Check if it's the empty line between head and body
         if (start >= eov) {
             start = eol + 1;
@@ -1059,18 +1059,18 @@ static Boolean _parseHeadersFromData(CFHTTPMessageRef message) {
             }
             break;
         }
-        
+
         c = *start;
-        
+
         // Check for continuation header
         if ((c == ' ') || (c == '\t')) {
-            
+
             if (!message->_lastKey) {
                 if (!(message->_flags & LAX_PARSING)) {
                     result = FALSE;
                     break;
                 }
-            } 
+            }
             else {
                 CFMutableStringRef value = CFStringCreateMutableCopy(alloc, 0, CFDictionaryGetValue(message->_headers, message->_lastKey));
                 CFStringRef str = CFStringCreateWithBytes(alloc, start, eov - start + 1, kCFStringEncodingISOLatin1, FALSE);
@@ -1080,12 +1080,12 @@ static Boolean _parseHeadersFromData(CFHTTPMessageRef message) {
                 CFRelease(value);
             }
         }
-        
+
         // It's a new header
         else {
-        
+
             const UInt8* colon = memchr(start, ':', eol - start);
-            
+
             if (!colon) {
                 // Bad header; check to see if it's the IIS/eBay bug (second status
                 // line being sent) before declaring it a parse error - 3140081
@@ -1099,13 +1099,13 @@ static Boolean _parseHeadersFromData(CFHTTPMessageRef message) {
                     break;
                 }
             }
-            
+
             else {
-                
+
                 CFStringRef key = NULL;
                 CFStringRef value, old;
                 int i;
-                
+
                 for (i = 0; i < kHTTPMessageNumItems; i++) {
                     const struct MessageHeaderMap* map = &kHTTPMessageHeaderMap[i];
                     if (((colon - start) == map->_length) &&
@@ -1115,7 +1115,7 @@ static Boolean _parseHeadersFromData(CFHTTPMessageRef message) {
                         break;
                     }
                 }
-                
+
                 if (!key) {
                     CFStringRef temp;
                     key = CFStringCreateWithBytes(alloc, start, colon - start, kCFStringEncodingISOLatin1, FALSE);
@@ -1123,39 +1123,39 @@ static Boolean _parseHeadersFromData(CFHTTPMessageRef message) {
                     CFRelease(key);
                     key = temp;
                 }
-                
+
                 if (message->_lastKey)
                     CFRelease(message->_lastKey);
                 message->_lastKey = CFRetain(key);
-                
+
                 c = *++colon;
                 while ((c == ' ') || (c == '\t'))
                     c = *++colon;
-                    
+
                 if (colon > eov)
                     value = CFRetain(_kCFHTTPMessageEmptyString);
                 else
                     value = CFStringCreateWithBytes(alloc, colon, eov - colon + 1, kCFStringEncodingISOLatin1, FALSE);
-                    
+
                 old = CFDictionaryGetValue(message->_headers, key);
                 if (old) {
                     CFStringRef newValue = CFStringCreateWithFormat(alloc, NULL, _kCFHTTPMessageAppendHeaderFormat, old, value);
                     CFRelease(value);
                     value = newValue;
                 }
-                
+
                 _CFHTTPMessageSetHeader(message, key, value, -1);
-                
+
                 CFRelease(key);
                 CFRelease(value);
             }
         }
-            
+
         start = eol + 1;
     }
-    
+
     if (start != CFDataGetBytePtr(message->_data)) {
-    
+
         if (message->_flags & MUTABLE_DATA) {
             CFDataReplaceBytes((CFMutableDataRef)message->_data, CFRangeMake(0, start - CFDataGetBytePtr(message->_data)), NULL, 0);
         }
@@ -1200,7 +1200,7 @@ extern Boolean _CFHTTPMessageConvertToDataOnlyResponse(CFHTTPMessageRef message)
     message->_firstLine = CFRetain(_kCFHTTPMessageEmptyString);
     message->_flags |= HEADERS_COMPLETE;
     return TRUE;
-} 
+}
 
 
 /*
@@ -1211,7 +1211,7 @@ extern Boolean _CFHTTPMessageConvertToDataOnlyResponse(CFHTTPMessageRef message)
 	in order to make the message stand on its own.
  */
 extern Boolean _CFHTTPMessageCanStandAlone(CFHTTPMessageRef message) {
-	
+
     if (!(message->_flags & IS_RESPONSE)) return FALSE;
 	if (message->_flags & HEADERS_COMPLETE) return TRUE;
 	if (!message->_firstLine) return FALSE;
@@ -1229,7 +1229,7 @@ extern Boolean _CFHTTPMessageCanStandAlone(CFHTTPMessageRef message) {
 	read header bytes that ended up in the body.  These
 	overflow bytes are supposed to be sent to the client
 	and not left on the message.
- 
+
 	Today HTTPFilter performs a CopyBody and then a
 	SetBody which causes an artificial balloon for a
 	moment in time.  Simply getting, retaining, and then

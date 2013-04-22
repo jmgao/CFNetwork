@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 #include <CoreFoundation/CFNumber.h>
@@ -101,7 +101,7 @@ typedef struct {
     CFDataRef customSSLContext;
 #if defined(DEBUG_FILTER)
     CFMutableDataRef _allData;
-#endif    
+#endif
 } _CFHTTPFilter;
 
 static Boolean httpRdFilterCanReadNoSignal(CFReadStreamRef stream, _CFHTTPFilter *httpFilter, CFStreamError *err);
@@ -168,7 +168,7 @@ static void *httpRdFilterCreate(CFReadStreamRef stream, void *info) {
     filter->_data = NULL;
 #if defined(DEBUG_FILTER)
     filter->_allData = CFDataCreateMutable(NULL, 0);
-#endif    
+#endif
     filter->socketStream.r = oldFilter->socketStream.r;
     CFRetain(filter->socketStream.r);
     filter->filteredStream.r = stream; // Do not retain; that will introduce a retain loop.
@@ -189,7 +189,7 @@ static void httpRdFilterDealloc(CFReadStreamRef stream, void *info) {
     if (filter->_data) CFRelease(filter->_data);
 #if defined(DEBUG_FILTER)
     filter->_allData = CFDataCreateMutable(NULL, 0);
-#endif    
+#endif
     CFReadStreamClose(filter->socketStream.r);
     CFReadStreamSetClient(filter->socketStream.r, kCFStreamEventNone, NULL, NULL);
     CFRelease(filter->socketStream.r);
@@ -200,7 +200,7 @@ static void httpRdFilterDealloc(CFReadStreamRef stream, void *info) {
 static void httpRdFilterStreamCallBack(CFReadStreamRef stream, CFStreamEventType event, void *clientCallBackInfo) {
     CFReadStreamRef filterStream = (CFReadStreamRef)clientCallBackInfo;
     _CFHTTPFilter *filter = (_CFHTTPFilter *)CFReadStreamGetInfoPointer(filterStream);
-	
+
 #if defined(LOG_FILTER)
     fprintf(stderr, "HTTPFilter: httpRdFilterStreamCallBack(stream = 0x%x, event = %d, filter = 0x%x)\n", (unsigned)stream, event, (unsigned)filter);
 #endif
@@ -211,7 +211,7 @@ static void httpRdFilterStreamCallBack(CFReadStreamRef stream, CFStreamEventType
 			if (httpRdFilterCanRead(filterStream, filter)) {
 				event = kCFStreamEventHasBytesAvailable;
 			} else {
-				
+
 				// 3784921 Check to see if the call to httpRdFilterCanRead has
 				// actually pushed the stream to or beyond the end.
 				CFStreamStatus status = CFReadStreamGetStatus(stream);
@@ -227,7 +227,7 @@ static void httpRdFilterStreamCallBack(CFReadStreamRef stream, CFStreamEventType
 					__CFSpinUnlock(&filter->lock);
 				}
 			}
-			
+
 			if (event != kCFStreamEventNone)
 				CFReadStreamSignalEvent(filterStream, event, NULL);
 		}
@@ -242,7 +242,7 @@ static void httpRdFilterStreamCallBack(CFReadStreamRef stream, CFStreamEventType
         break;
     }
     default:
-        CFReadStreamSignalEvent(filterStream, event, NULL);        
+        CFReadStreamSignalEvent(filterStream, event, NULL);
     }
 }
 
@@ -258,7 +258,7 @@ static Boolean httpRdFilterOpen(CFReadStreamRef stream, CFStreamError *errorCode
     CFReadStreamSetClient(filter->socketStream.r, kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered, (CFReadStreamClientCallBack)httpRdFilterStreamCallBack, &clientContext);
     status = CFReadStreamGetStatus(filter->socketStream.r);
     if (status == kCFStreamStatusNotOpen) {
-        result = CFReadStreamOpen(filter->socketStream.r); 
+        result = CFReadStreamOpen(filter->socketStream.r);
     } else {
         result = TRUE;
     }
@@ -269,7 +269,7 @@ static Boolean httpRdFilterOpen(CFReadStreamRef stream, CFStreamError *errorCode
         *openComplete = TRUE;
         *errorCode = CFReadStreamGetError(filter->socketStream.r);
     }
-	
+
 	__CFSpinUnlock(&filter->lock);
 
 	return result;
@@ -309,12 +309,12 @@ static void httpRdFilterUnschedule(CFReadStreamRef stream, CFRunLoopRef runLoop,
 static long long expectedSizeFromHeaders(CFHTTPMessageRef responseHeader) {
     CFStringRef contentLength;
     Boolean gotGoodContentLength = FALSE;
-    
+
     // Check to see if this is a request and if the request method is "GET"; if so, set the expected content length to 0 regardless of anything else (some servers get upset if you explicitly set the content length to 0 for GETs, even though that should work fine by the spec).
     if (CFHTTPMessageIsRequest(responseHeader) && _CFHTTPMessageIsGetMethod(responseHeader)) {
 		return 0; // GET requests send no message body
     }
-   
+
     contentLength = CFHTTPMessageCopyHeaderFieldValue(responseHeader, _kCFHTTPFilterContentLengthHeader);
     if (contentLength) {
         CFIndex charIndex = 0, length = CFStringGetLength(contentLength);
@@ -325,10 +325,10 @@ static long long expectedSizeFromHeaders(CFHTTPMessageRef responseHeader) {
             if (ch != ' ' && ch != '\t') break;
             charIndex ++;
         }
-		
+
 		/* 3687749 Mark an empty content length as zero */
 		if (charIndex >= length) gotGoodContentLength = TRUE;
-		
+
         while (charIndex < length) {
             ch = CFStringGetCharacterAtIndex(contentLength, charIndex);
             charIndex ++;
@@ -367,7 +367,7 @@ static Boolean readHeaderBytes(_CFHTTPFilter *httpFilter, Boolean toCompletion, 
     CFStringRef headerString;
     CFReadStreamRef stream = httpFilter->socketStream.r;
     int status;
-    	
+
     if (httpFilter->_data) {
         CFIndex length = CFDataGetLength(httpFilter->_data);
         const UInt8 *bytes = CFDataGetBytePtr(httpFilter->_data);
@@ -391,11 +391,11 @@ static Boolean readHeaderBytes(_CFHTTPFilter *httpFilter, Boolean toCompletion, 
 				if (connectionHeader) CFRelease(connectionHeader);
 				CFRelease(httpFilter->header);
 				httpFilter->header = proxyResponse;
-				
+
 			}
 		}
 	}
-	
+
     while (parseSucceeded && !CFHTTPMessageIsHeaderComplete(httpFilter->header) && (toCompletion || CFReadStreamHasBytesAvailable(stream))) {
         CFIndex bytesRead = CFReadStreamRead(stream, buffer, bufferLength);
         if (bytesRead == 0) {
@@ -438,7 +438,7 @@ static Boolean readHeaderBytes(_CFHTTPFilter *httpFilter, Boolean toCompletion, 
 
 	if (httpFilter->_data)
 		CFRelease(httpFilter->_data);
-	
+
     httpFilter->_data = (CFMutableDataRef)_CFHTTPMessageGetBody(httpFilter->header);
 	if (httpFilter->_data) {
 		CFRetain(httpFilter->_data);
@@ -457,13 +457,13 @@ static Boolean readHeaderBytes(_CFHTTPFilter *httpFilter, Boolean toCompletion, 
         httpFilter->header = newHeader;
         return readHeaderBytes(httpFilter, toCompletion, buffer, bufferLength, error);
     }
-    
+
     if (__CFBitIsSet(httpFilter->flags, ZERO_LENGTH_RESPONSE_EXPECTED)) {
         __CFBitClear(httpFilter->flags, ZERO_LENGTH_RESPONSE_EXPECTED);
         httpFilter->expectedBytes = 0;
         return TRUE;
     }
-    
+
     // See if we're chunked or not
     headerString = CFHTTPMessageCopyHeaderFieldValue(httpFilter->header, _kCFHTTPFilterTransferEncodingHeader);
     if (headerString) {
@@ -492,7 +492,7 @@ static Boolean readHeaderBytes(_CFHTTPFilter *httpFilter, Boolean toCompletion, 
         CFRelease(encodingsArray);
         CFRelease(headerString);
     }
-    
+
     if (__CFBitIsSet(httpFilter->flags, IS_CHUNKED)) {
         // Mark it as at the end of a chunk so the read routine will start with a new chunk
         __CFBitSet(httpFilter->flags, FIRST_CHUNK);
@@ -500,7 +500,7 @@ static Boolean readHeaderBytes(_CFHTTPFilter *httpFilter, Boolean toCompletion, 
     } else {
         // See if we have a valid content-length
         httpFilter->expectedBytes = expectedSizeFromHeaders(httpFilter->header);
-		
+
 		if ((httpFilter->expectedBytes == WAIT_FOR_END_OF_STREAM) && (CFReadStreamGetStatus(stream) == kCFStreamStatusAtEnd))
 			httpFilter->expectedBytes = 0;
     }
@@ -524,7 +524,7 @@ static Boolean readHeaderBytes(_CFHTTPFilter *httpFilter, Boolean toCompletion, 
         }
         Content-Length := length
         Remove "chunked" from Transfer-Encoding
-        
+
 And from section 3.6.1, the productions for the chunked terms
     Chunked-Body = *chunk
                     last-chunk
@@ -648,7 +648,7 @@ static CFIndex parseChunkedHeader(const UInt8 *buffer, CFIndex bufferLength, Boo
             return -1;
         }
     }
-    return -1;    
+    return -1;
 }
 
 // Returns TRUE if and only if there were enough bytes in headerBytes to get a definitive result; otherwise, returns FALSE leaving httpFilter unmodified.  if TRUE is returned, firstDataByte is set to point to the first byte that should be reported back to the client (and httpFilter->expectedBytes and httpFilter->processedBytes is set accordingly), or -1 if the parse failed.  Regardless, error is set accordingly.
@@ -717,7 +717,7 @@ static Boolean readChunkedHeader(_CFHTTPFilter *httpFilter, Boolean toCompletion
     const UInt8 *dataBytes = dataLength != 0 ? CFDataGetBytePtr(httpFilter->_data) : NULL;
     Boolean result = TRUE, done = FALSE;
     CFReadStreamRef stream = httpFilter->socketStream.r;
-    // First see if the bytes in data are sufficient 
+    // First see if the bytes in data are sufficient
     if (dataBytes) {
         CFIndex endOfHeader;
         if (setFilterForChunkedHeaderBytes(httpFilter, dataBytes, dataLength, &endOfHeader, error)) {
@@ -787,7 +787,7 @@ static Boolean readChunkedHeader(_CFHTTPFilter *httpFilter, Boolean toCompletion
             }
         }
     }
-    
+
     // If all else fails, keep reading bytes into data until we have enough.  Hopefully we never reach this case (assuming we're being given a reasonably sized buffer, we shouldn't - chunk headers are in general very small), since it's somewhat expensive.
     if (httpFilter->_data == NULL || !__CFBitIsSet(httpFilter->flags, DATA_IS_MUTABLE)) {
         if (httpFilter->_data) {
@@ -844,13 +844,13 @@ static Boolean readChunkedHeader(_CFHTTPFilter *httpFilter, Boolean toCompletion
 
 
 static void addTrailingHeader(CFStringRef key, CFStringRef value, CFHTTPMessageRef response) {
-    
+
     CFStringRef original = CFHTTPMessageCopyHeaderFieldValue(response, key);
     if (original) {
         value = CFStringCreateWithFormat(CFGetAllocator(response), NULL, _kCFHTTPFilterTrailingHeadersFormat, original, value);
         CFRelease(original);
     }
-    
+
     CFHTTPMessageSetHeaderFieldValue(response, key, value);
 }
 
@@ -861,25 +861,25 @@ static Boolean readChunkedTrailers(_CFHTTPFilter *httpFilter, CFStreamError *err
     static const char bogus[] = "HTTP/1.0 200 OK\r\n";
     CFReadStreamRef stream = httpFilter->socketStream.r;
     Boolean result = TRUE;
-    
+
     CFHTTPMessageRef hdrs = CFHTTPMessageCreateEmpty(CFGetAllocator(stream), FALSE);
     CFHTTPMessageAppendBytes(hdrs, (const UInt8*)bogus,  sizeof(bogus) - 1);
-    
+
     if (httpFilter->_data) {
         CFIndex length = CFDataGetLength(httpFilter->_data);
         const UInt8 *bytes = CFDataGetBytePtr(httpFilter->_data);
-        
+
         result = CFHTTPMessageAppendBytes(hdrs, bytes, length);
-       
+
         CFRelease(httpFilter->_data);
         httpFilter->_data = NULL;
     }
-    
+
     while (result && !CFHTTPMessageIsHeaderComplete(hdrs)) {
-        
+
         UInt8 buffer[2048];
         CFIndex bytesRead = CFReadStreamRead(stream, buffer, sizeof(buffer));
-        
+
         if (bytesRead > 0) {
 #if defined(DEBUG_FILTER)
             CFDataAppendBytes(httpFilter->_allData, buffer, bytesRead);
@@ -895,26 +895,26 @@ static Boolean readChunkedTrailers(_CFHTTPFilter *httpFilter, CFStreamError *err
             result = FALSE;
         }
     }
-    
+
     if (result) {
         CFDictionaryRef fields;
-        
+
         CFDataRef leftovers = CFHTTPMessageCopyBody(hdrs);
-        
+
         if (leftovers) {
             httpFilter->_data = (CFMutableDataRef)leftovers;
             __CFBitClear(httpFilter->flags, DATA_IS_MUTABLE);
         }
-        
+
         fields = CFHTTPMessageCopyAllHeaderFields(hdrs);
         if (fields) {
             CFDictionaryApplyFunction(fields, (CFDictionaryApplierFunction)addTrailingHeader, httpFilter->header);
             CFRelease(fields);
         }
     }
-    
+
     CFRelease(hdrs);
-    
+
     return result;
 }
 
@@ -924,16 +924,16 @@ static CFIndex doChunkedRead(_CFHTTPFilter *httpFilter, UInt8 *buffer, CFIndex b
     CFReadStreamRef stream = httpFilter->socketStream.r;
     *atEOF = FALSE;
     error->error = 0;
-    
+
     while (bufferLength > 0) {
         CFIndex bytesRemainingInChunk;
-        
+
         if (__CFBitIsSet(httpFilter->flags, LAST_CHUNK)) {
             *atEOF = TRUE;
             errorOccurred = (readChunkedTrailers(httpFilter, error)) ? FALSE : TRUE;
             break;
         }
-        
+
         // Read the header if necessary
         if (httpFilter->expectedBytes == MID_CHUNK_HEADER_PARSE || httpFilter->expectedBytes == httpFilter->processedBytes) {
             // Note that we don't want to block reading the chunk header if we've already got some bytes to return
@@ -952,7 +952,7 @@ static CFIndex doChunkedRead(_CFHTTPFilter *httpFilter, UInt8 *buffer, CFIndex b
             }
             // else we got a good chunk header; fall-through to start processing the actual bytes.
         }
-        
+
         bytesRemainingInChunk = httpFilter->expectedBytes - httpFilter->processedBytes;
         // Exhaust any data we're holding
         if (httpFilter->_data) {
@@ -1126,7 +1126,7 @@ static CFIndex httpRdFilterRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex b
 		__CFSpinUnlock(&httpFilter->lock);
         return -1; // readHeaderBytes set our error code for us.
     }
-    
+
     if (__CFBitIsSet(httpFilter->flags, IS_CHUNKED)) {
         result = doChunkedRead(httpFilter, buffer, bufferLength, error, atEOF);
     } else {
@@ -1168,9 +1168,9 @@ static Boolean httpRdFilterCanReadNoSignal(CFReadStreamRef stream, _CFHTTPFilter
         }
         if (!CFHTTPMessageIsHeaderComplete(httpFilter->header)) {
             return FALSE;
-        } 
+        }
     }
-    
+
     // We are safely past the http header; now see if we need to pass a chunk header.  We cannot fold this into the code above because we may be between chunks
     if (__CFBitIsSet(httpFilter->flags, IS_CHUNKED) && (httpFilter->expectedBytes == httpFilter->processedBytes || httpFilter->expectedBytes == MID_CHUNK_HEADER_PARSE)) {
         if (__CFBitIsSet(httpFilter->flags, LAST_CHUNK)) {
@@ -1259,7 +1259,7 @@ void _CFHTTPReadStreamReadMark(CFReadStreamRef fStream) {
         if (httpFilter->_data) {
             CFDataAppendBytes(httpFilter->_allData, CFDataGetBytePtr(httpFilter->_data), CFDataGetLength(httpFilter->_data));
         }
-#endif    
+#endif
     }
     if (httpRdFilterCanReadNoSignal(fStream, httpFilter, &error)) {
         _CFReadStreamSignalEventDelayed(fStream, kCFStreamEventHasBytesAvailable, NULL);
@@ -1272,22 +1272,22 @@ void _CFHTTPReadStreamReadMark(CFReadStreamRef fStream) {
     } else if (CFReadStreamGetStatus(httpFilter->socketStream.r) == kCFStreamStatusAtEnd) {
         error.domain= kCFStreamErrorDomainHTTP;
         error.error = kCFStreamErrorHTTPConnectionLost;
-        _CFReadStreamSignalEventDelayed(fStream, kCFStreamEventErrorOccurred, &error);        
+        _CFReadStreamSignalEventDelayed(fStream, kCFStreamEventErrorOccurred, &error);
     }
 
     if (filteredStream->client) {
         filteredStream->client->whatToSignal &= ~kCFStreamEventMarkEncountered;
     }
-	
+
 	__CFSpinUnlock(&httpFilter->lock);
 }
 
 static CFTypeRef httpRdFilterCopyProperty(CFReadStreamRef stream, CFStringRef propertyName, void *info) {
     _CFHTTPFilter *filter = (_CFHTTPFilter *)info;
 	CFTypeRef result = NULL;
-	
+
 	__CFSpinLock(&filter->lock);
-	
+
     if (CFEqual(propertyName, _kCFStreamPropertyHTTPPersistent)) {
         result = (__CFBitIsSet(filter->flags, MARK_ENABLED)) ? kCFBooleanTrue : kCFBooleanFalse;
     } else if ((!CFHTTPMessageIsRequest(filter->header) && CFEqual(propertyName, kCFStreamPropertyHTTPResponseHeader)) || (CFHTTPMessageIsRequest(filter->header) && CFEqual(propertyName, kCFStreamPropertyHTTPRequest))) {
@@ -1301,7 +1301,7 @@ static CFTypeRef httpRdFilterCopyProperty(CFReadStreamRef stream, CFStringRef pr
     } else {
         result = CFReadStreamCopyProperty(filter->socketStream.r, propertyName);
     }
-	
+
 	__CFSpinUnlock(&filter->lock);
 
 	return result;
@@ -1349,7 +1349,7 @@ static Boolean httpRdFilterSetProperty(CFReadStreamRef stream, CFStringRef propN
     }
 }
 
-static const CFReadStreamCallBacks HTTPReadFilterCallBacks = {1, 
+static const CFReadStreamCallBacks HTTPReadFilterCallBacks = {1,
 httpRdFilterCreate
 , httpRdFilterDealloc
 , NULL /*copyDesc*/, httpRdFilterOpen
@@ -1460,7 +1460,7 @@ static Boolean httpWrFilterOpen(CFWriteStreamRef stream, CFStreamError *errorCod
     CFWriteStreamSetClient(filter->socketStream.w, kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered, (CFWriteStreamClientCallBack)httpWrFilterStreamCallBack, &clientContext);
     status = CFWriteStreamGetStatus(filter->socketStream.w);
     if (status == kCFStreamStatusNotOpen) {
-        result = CFWriteStreamOpen(filter->socketStream.w); 
+        result = CFWriteStreamOpen(filter->socketStream.w);
     } else {
         result = TRUE;
     }
@@ -1488,7 +1488,7 @@ static CFStreamError transmitHeader(_CFHTTPFilter *filter, Boolean blockUntilDon
     const UInt8 *bytes;
     Boolean firstTime = TRUE;
     Boolean isFirstWriteOfHeader = FALSE;
-	
+
     CFWriteStreamRef stream = filter->socketStream.w;
     if (__CFBitIsSet(filter->flags, HEADER_TRANSMITTED)) {
         return err;
@@ -1559,7 +1559,7 @@ static CFStreamError transmitHeader(_CFHTTPFilter *filter, Boolean blockUntilDon
             __CFBitSet(filter->flags, IS_CHUNKED);
             filter->expectedBytes = 0;
         }
-        filter->_data = (CFMutableDataRef)_CFHTTPMessageCopySerializedHeaders(filter->header, __CFBitIsSet(filter->flags, IS_PROXY));  
+        filter->_data = (CFMutableDataRef)_CFHTTPMessageCopySerializedHeaders(filter->header, __CFBitIsSet(filter->flags, IS_PROXY));
         isFirstWriteOfHeader = TRUE;
         filter->processedBytes = 0;
     }
@@ -1613,7 +1613,7 @@ static void sendChunkHeader(CFWriteStreamRef stream, CFIndex chunkLength, Boolea
     error->error = 0;
     writeBuffer[MAX_CHUNK_HEADER_SIZE - 1] = '\n';
     writeBuffer[MAX_CHUNK_HEADER_SIZE - 2] = '\r';
-    writeBase = &(writeBuffer[MAX_CHUNK_HEADER_SIZE-3]); 
+    writeBase = &(writeBuffer[MAX_CHUNK_HEADER_SIZE-3]);
     while (chunkLength > 0) {
         int nextDigit = chunkLength & 0xF;
         *writeBase = nextDigit < 10 ? '0' + nextDigit : 'A' + nextDigit - 10;
@@ -1657,7 +1657,7 @@ static CFIndex doChunkedWrite(const UInt8 *buffer, CFIndex bufferLength, CFStrea
         filter->expectedBytes = bufferLength;
         filter->processedBytes = 0;
     }
-    
+
     while (filter->expectedBytes > filter->processedBytes && (totalBytesWritten == 0 || CFWriteStreamCanAcceptBytes(stream))) {
         int bytesToWrite = filter->expectedBytes - filter->processedBytes > bufferLength ? bufferLength : filter->expectedBytes - filter->processedBytes;
         int bytesWritten = CFWriteStreamWrite(stream, buffer, bytesToWrite);
@@ -1684,7 +1684,7 @@ static CFIndex doChunkedWrite(const UInt8 *buffer, CFIndex bufferLength, CFStrea
             return newBytesWritten + totalBytesWritten;
         }
     }
-    
+
 }
 
 static CFIndex httpWrFilterWrite(CFWriteStreamRef stream, const UInt8 *buffer, CFIndex bufferLength, CFStreamError *error, void *info) {
@@ -1698,7 +1698,7 @@ static CFIndex httpWrFilterWrite(CFWriteStreamRef stream, const UInt8 *buffer, C
         return -1;
     }
     if (__CFBitIsSet(filter->flags, MARK_ENABLED) && __CFBitIsSet(filter->flags, AT_MARK)) {
-        // it is an error to try to write after sending the mark, but before resetting the outgoing message. 
+        // it is an error to try to write after sending the mark, but before resetting the outgoing message.
         error->error = _kCFStreamErrorHTTPStreamAtMark;
         error->domain = kCFStreamErrorDomainHTTP;
 		__CFSpinUnlock(&filter->lock);
@@ -1736,7 +1736,7 @@ static CFIndex httpWrFilterWrite(CFWriteStreamRef stream, const UInt8 *buffer, C
         }
     }
 }
- 
+
 static Boolean httpWrFilterCanWrite(CFWriteStreamRef stream, void *info) {
     _CFHTTPFilter *filter = (_CFHTTPFilter *)info;
 	__CFSpinLock(&filter->lock);
@@ -1764,7 +1764,7 @@ static Boolean httpWrFilterCanWrite(CFWriteStreamRef stream, void *info) {
 			__CFSpinUnlock(&filter->lock);
             CFWriteStreamSignalEvent(stream, kCFStreamEventErrorOccurred, &error);
             return FALSE;
-        } 
+        }
     }
     if (!__CFBitIsSet(filter->flags, HEADER_TRANSMITTED) || !CFWriteStreamCanAcceptBytes(filter->socketStream.w)) {
 		__CFSpinUnlock(&filter->lock);
@@ -1800,9 +1800,9 @@ void _CFHTTPWriteStreamWriteMark(CFWriteStreamRef filteredStream) {
 static CFTypeRef httpWrFilterCopyProperty(CFWriteStreamRef stream, CFStringRef propertyName, void *info) {
     _CFHTTPFilter *filter = (_CFHTTPFilter *)info;
 	CFTypeRef result = NULL;
-	
+
 	__CFSpinLock(&filter->lock);
-    
+
 	// Pointer equality is fine on this one.
 	if (propertyName == _kCFStreamPropertyHTTPSProxyHoldYourFire) {
 		if (__CFBitIsSet(filter->flags, HTTPS_PROXY_FAILURE)) result = kCFBooleanTrue;
@@ -1828,7 +1828,7 @@ static CFTypeRef httpWrFilterCopyProperty(CFWriteStreamRef stream, CFStringRef p
 }
 
 static void prepareHTTPSProxy(_CFHTTPFilter *filter) {
-    
+
     CFStringRef header = CFHTTPMessageCopyHeaderFieldValue(filter->header, _kCFHTTPFilterProxyAuthorizationHeader);
     if (header) {
         CFHTTPMessageSetHeaderFieldValue(filter->header, _kCFHTTPFilterProxyAuthorizationHeader, NULL);
@@ -1869,7 +1869,7 @@ static Boolean httpWrFilterSetProperty(CFWriteStreamRef stream, CFStringRef prop
 		__CFBitClear(filter->flags, AT_MARK);
 		__CFBitClear(filter->flags, HEADER_TRANSMITTED);
 		__CFBitClear(filter->flags, HTTPS_PROXY_FAILURE);
-		
+
 		if ((__CFBitIsSet(filter->flags, STRIP_PROXY_AUTH) || __CFBitIsSet(filter->flags, IS_PROXY)) && CFHTTPMessageIsRequest(msg)) {
 			// This is the first header; we need to check if we're talking to an HTTPS proxy
 			CFURLRef url = CFHTTPMessageCopyRequestURL(msg);
@@ -1880,7 +1880,7 @@ static Boolean httpWrFilterSetProperty(CFWriteStreamRef stream, CFStringRef prop
 			}
 			CFRelease(scheme);
 		}
-		
+
 		if (!__CFBitIsSet(filter->flags, FIRST_HEADER_SEEN)) {
 			__CFBitSet(filter->flags, FIRST_HEADER_SEEN);
 #if defined(__MACH__)
@@ -1894,11 +1894,11 @@ static Boolean httpWrFilterSetProperty(CFWriteStreamRef stream, CFStringRef prop
 			}
 #endif
 		}
-		
+
 		if (CFWriteStreamCanAcceptBytes(filter->socketStream.w)) {
 			transmitHeader(filter, FALSE);
 		}
-		
+
 		__CFSpinUnlock(&filter->lock);
 		return TRUE;
 #if defined(__MACH__)
@@ -1932,16 +1932,16 @@ static void httpWrFilterUnschedule(CFWriteStreamRef stream, CFRunLoopRef runLoop
 	__CFSpinUnlock(&filter->lock);
 }
 
-static const CFWriteStreamCallBacks httpFilteredStreamCBs = {1, 
-httpWrFilterCreate, 
-httpWrFilterDealloc, NULL /* copyDesc */, 
-httpWrFilterOpen, NULL /* openCompleted */, 
-httpWrFilterWrite, 
-httpWrFilterCanWrite, 
-httpWrFilterClose, 
-httpWrFilterCopyProperty, 
-httpWrFilterSetProperty, NULL, 
-httpWrFilterSchedule, 
+static const CFWriteStreamCallBacks httpFilteredStreamCBs = {1,
+httpWrFilterCreate,
+httpWrFilterDealloc, NULL /* copyDesc */,
+httpWrFilterOpen, NULL /* openCompleted */,
+httpWrFilterWrite,
+httpWrFilterCanWrite,
+httpWrFilterClose,
+httpWrFilterCopyProperty,
+httpWrFilterSetProperty, NULL,
+httpWrFilterSchedule,
 httpWrFilterUnschedule};
 
 CF_EXPORT

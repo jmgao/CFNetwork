@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /* CFHTTPStream.c
@@ -73,8 +73,8 @@
 #define WAITING_FOR_PROXY_STREAM (18)
 // Used when we wish to guarantee that haveBeenOrphaned not reattempt this transaction, usually because we are the current request/response and have just detected an error.  As the originator of the error, we should not reattempt.
 #define DO_NOT_REATTEMPT (19)
-/* A bit of a hack to cover the fact that we may become the current response well before the net connection signals 
-    us with stateChanged to prepareReception.  The problem is that once we become the current response, we get the 
+/* A bit of a hack to cover the fact that we may become the current response well before the net connection signals
+    us with stateChanged to prepareReception.  The problem is that once we become the current response, we get the
     response stream callbacks, which may include the mark (actually intended for the prior response) - we don't want
     that to cause us to send an endEncountered event.  Now, if we receive such an event and we have not yet read the mark,
     we simply do so and continue.  */
@@ -88,15 +88,15 @@ typedef struct _CFHTTPRequest {
     CFDataRef requestFragment; // Fragmentary data read from requestPayload but not yet written to the connection's request stream
     long long requestBytesWritten;
     CFReadStreamRef responseStream; // The stream we returned for this request
-    
+
     // proxyDict is the dictionary with all the info about proxies in general.  proxyList is the list of proxies to be tried (in order) with the current URL.  proxyStream is the stream being used to load the proxy information; it's mutually exclusive with proxyList.  One day, they should be a union, but I don't want to deal with the complexity now.
     CFDictionaryRef proxyDict;
     CFMutableArrayRef proxyList;
     CFReadStreamRef proxyStream;
-    
+
     CFMutableArrayRef redirectedURLs; // NULL unless automatic redirection is requested
     CFHTTPMessageRef firstRedirection; // Only non-NULL if a redirection occurs; private support for Foundation
-    
+
     _CFNetConnectionRef conn;  // The connection we are scheduled on; consult OWNS_CONNECTION flag bit to determine whether we own the connection or the connection owns us
     CFRunLoopSourceRef stateChangeSource; // This source is used when we need to wait on an outside state change - either for bytes to come in on the connection, or for some request upstream of us to progress.
     CFMutableDictionaryRef connProps;
@@ -256,7 +256,7 @@ static CFDictionaryRef newConnPropsForSOCKSProxy(CFAllocatorRef alloc, CFURLRef 
     CFStringRef scheme;
     SInt32 port;
     CFStringRef user;
-    
+
     CFStringRef keys[5];
     CFTypeRef values[5];
     CFDictionaryRef socksProxyDict;
@@ -268,7 +268,7 @@ static CFDictionaryRef newConnPropsForSOCKSProxy(CFAllocatorRef alloc, CFURLRef 
     keys[1] = kCFStreamPropertySOCKSProxyPort;
     port = CFURLGetPortNumber(proxyURL);
     values[1] = CFNumberCreate(alloc, kCFNumberSInt32Type, &port);
-    
+
     keys[2] = kCFStreamPropertySOCKSVersion;
     scheme = CFURLCopyScheme(proxyURL);
     if (CFStringCompare(scheme, _kCFHTTPStreamSOCKS4Scheme, kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
@@ -303,7 +303,7 @@ static CFDictionaryRef newConnPropsForSOCKSProxy(CFAllocatorRef alloc, CFURLRef 
 static CFDictionaryRef newConnPropsForHTTPSProxy(CFAllocatorRef alloc, CFHTTPMessageRef req, CFURLRef proxyURL) {
 
     SInt32 port;
-    
+
     CFStringRef keys[3];
     CFTypeRef values[3];
     CFDictionaryRef headers;
@@ -373,14 +373,14 @@ CF_EXPORT void _CFHTTPGetConnectionInfoForProxyURL(CFURLRef proxyURL, CFHTTPMess
         } else if ((CFStringCompare(scheme, _kCFHTTPStreamSOCKS4Scheme, kCFCompareCaseInsensitive) == kCFCompareEqualTo) || (CFStringCompare(scheme, _kCFHTTPStreamSOCKS5Scheme, kCFCompareCaseInsensitive) == kCFCompareEqualTo)) {
             CFURLRef targetURL = CFHTTPMessageCopyRequestURL(request);
             CFStringRef targetScheme = CFURLCopyScheme(targetURL);
-            
+
             if (CFStringCompare(targetScheme, _kCFHTTPStreamHTTPSScheme, kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
                 *type = kHTTPS;
             } else {
                 *type = kHTTP;
             }
             CFRelease(targetScheme);
-            
+
             *host = CFURLCopyHostName(targetURL);
 
             *port = CFURLGetPortNumber(targetURL);
@@ -427,7 +427,7 @@ static _CFNetConnectionCacheKey nextConnectionCacheKeyFromProxyArray(_CFHTTPRequ
     } else {
         props = NULL;
     }
-    
+
     key = createConnectionCacheKey(host, port, type, props);
     if (host) CFRelease(host);
     if (additionalProperties) CFRelease(additionalProperties);
@@ -485,20 +485,20 @@ static int extractSocksProperties(CFDictionaryRef dict, CFTypeRef *outKeys, CFTy
         kSCPropNetProxiesSOCKSEnable
 #endif
     };
-	
+
     int i, numFound = 0;
-	
+
 	for (i = 0; i < (sizeof(keys) / sizeof(keys[0])); i++) {
-		
+
         CFTypeRef value = CFDictionaryGetValue(dict, keys[i]);
-		
+
 		if (value) {
 			outKeys[numFound] = keys[i];
 			outValues[numFound] = value;
 			numFound++;
 		}
 	}
-	
+
     return numFound;
 }
 
@@ -574,7 +574,7 @@ _CFHTTPRequest *createZombieDouble1(CFAllocatorRef alloc, _CFHTTPRequest *orig, 
     CFRetain(zombie->originalRequest);
     zombie->currentRequest = orig->currentRequest;
     CFRetain(zombie->currentRequest);
-    
+
     // For both of these, we want to transfer ownership to the zombie.  The original will have to deal without.
     zombie->requestFragment = orig->requestFragment;
     if (zombie->requestFragment) orig->requestFragment = NULL;
@@ -586,7 +586,7 @@ _CFHTTPRequest *createZombieDouble1(CFAllocatorRef alloc, _CFHTTPRequest *orig, 
     } else {
         zombie->requestPayload = NULL;
     }
-    
+
     // This is kinda ugly, but the zombie needs to know where it should schedule/unschedule, and the usual
     // way to do that is to look at its response stream.  So, we create a dummy response stream and schedule
     // it wherever orig->responseStream is scheduled.  Since we never open the stream, life should be good....
@@ -616,17 +616,17 @@ static Boolean canShutdownConnection(_CFNetConnectionRef conn, _CFHTTPRequest *r
     Boolean empty = depth == 0 || (allowOneEntry && depth == 1);
     Boolean hasAuth = FALSE;
     Boolean authComplete = TRUE;
-    
+
     auth[0] = connectionOrientedAuth(req, FALSE);
     auth[1] = connectionOrientedAuth(req, TRUE);
-            
+
     for (i = 0; i < (sizeof(auth) / sizeof(auth[0])); i++) {
-        
+
         if (!auth[i])
                 continue;
-        
+
         hasAuth = TRUE;
-        
+
         if (!isPersistent || !CFHTTPAuthenticationIsValid(auth[i], NULL)) {
                 bad++;
                 _CFHTTPAuthenticationDisassociateConnection(auth[i], conn);
@@ -634,7 +634,7 @@ static Boolean canShutdownConnection(_CFNetConnectionRef conn, _CFHTTPRequest *r
         else
                 authComplete = authComplete && _CFHTTPAuthenticationConnectionAuthenticated(auth[i], conn);
     }
-    
+
     /*
     ** There are four reasons for which to pull the connection from the cache:
     **
@@ -716,8 +716,8 @@ static void httpRequestDestroy(CFAllocatorRef alloc, _CFHTTPRequest *req) {
     if (req->connProps) CFRelease(req->connProps);
     if (req->stateChangeSource) CFRelease(req->stateChangeSource);
 	if (req->peerCertificates) CFRelease(req->peerCertificates);
-    
-    CFAllocatorDeallocate(alloc, req); 
+
+    CFAllocatorDeallocate(alloc, req);
 }
 
 static void httpRequestFinalize(CFReadStreamRef stream, void *info) {
@@ -777,13 +777,13 @@ extern void cleanUpRequest(CFHTTPMessageRef req, int length, Boolean forPersiste
     } else {
         CFRelease(val);
     }
-    
+
     if (length > -1 && !_CFHTTPMessageIsGetMethod(req)) {
         CFStringRef lenStr = CFStringCreateWithFormat(CFGetAllocator(req), NULL, _kCFHTTPStreamContentLengthFormat, length);
         CFHTTPMessageSetHeaderFieldValue(req, _kCFHTTPStreamContentLengthHeader, lenStr);
         CFRelease(lenStr);
     }
-    
+
     if (forPersistentConnection) {
         CFHTTPMessageSetHeaderFieldValue(req, _kCFHTTPStreamConnectionHeader, _kCFHTTPStreamConnectionKeepAlive);
 		if (forProxy) {
@@ -822,10 +822,10 @@ static inline Boolean isConnectionToProxy(_CFNetConnectionRef conn) {
     SInt32 port;
     UInt32 type;
     CFDictionaryRef props;
-    
+
     getValuesFromKey(key, &host, &port, &type, &props);
     return (type == kHTTPProxy) || (type == kHTTPSProxy);
-    
+
 }
 
 static void prepareTransmission1(_CFHTTPRequest *req, CFWriteStreamRef requestStream, _CFNetConnectionRef conn) {
@@ -834,8 +834,8 @@ static void prepareTransmission1(_CFHTTPRequest *req, CFWriteStreamRef requestSt
     CFStreamClientContext ctxt = {0, req, NULL, NULL, NULL};
     CFDataRef payload = NULL;
     Boolean forProxy = isConnectionToProxy(conn);
-    
-    
+
+
     // Set requestPayload properly; clean up the request
     if (__CFBitIsSet(req->flags, PAYLOAD_IS_DATA) && (payload = CFHTTPMessageCopyBody(req->originalRequest)) != NULL) {
         CFIndex length = CFDataGetLength(payload);
@@ -844,13 +844,13 @@ static void prepareTransmission1(_CFHTTPRequest *req, CFWriteStreamRef requestSt
             CFReadStreamClose(req->requestPayload);
             CFRelease(req->requestPayload);
         }
-        
+
         if (length) {
             req->requestPayload = CFReadStreamCreateWithBytesNoCopy(CFGetAllocator(payload), CFDataGetBytePtr(payload), length, kCFAllocatorNull);
         }
         else
             req->requestPayload = NULL;
-            
+
         CFRelease(payload); // originalRequest is holding it for us
         cleanUpRequest(req->currentRequest, length, reqIsPersistent, forProxy);
     } else if (!req->requestPayload) {
@@ -858,7 +858,7 @@ static void prepareTransmission1(_CFHTTPRequest *req, CFWriteStreamRef requestSt
     } else {
         cleanUpRequest(req->currentRequest, -1, reqIsPersistent, forProxy);
     }
-    
+
     // Set client on both streams and schedule.  Open payload (requestStream is already open)
     if (req->requestPayload) {
         CFArrayRef rlArray;
@@ -913,7 +913,7 @@ static void concludeReception1(_CFHTTPRequest *req, CFReadStreamRef responseStre
 
     if (__CFBitIsSet(req->flags, IS_ZOMBIE)) {
         CFAllocatorRef alloc = CFGetAllocator(req->conn);
-        dequeueFromConnection1(req); 
+        dequeueFromConnection1(req);
         httpRequestDestroy(alloc, req);
         *haveBeenDealloced = TRUE;
     } else {
@@ -941,13 +941,13 @@ static void concludeReception1(_CFHTTPRequest *req, CFReadStreamRef responseStre
 
 static Boolean shouldReattemptRequest(_CFHTTPRequest *req, CFStreamError *err, int oldState, _CFNetConnectionRef conn, Boolean *advanceToNextProxy) {
     *advanceToNextProxy = FALSE;
-    
+
     if (__CFBitIsSet(req->flags, IS_ZOMBIE)) {
         return FALSE;
     } else if (!isPersistent(req) || __CFBitIsSet(req->flags, DO_NOT_REATTEMPT)) {
         // Under these circumstances, we should never reattempt with the current connection (or another connection just like it).
         // See if we should reattempt after advancing to the next proxy; if not, we just error out at this point.
-        
+
         // test that we have a proxy to advance to, and that the prior state was kTransmittingRequest
         if (oldState == kTransmittingRequest && req->proxyList && CFArrayGetCount(req->proxyList) > 1 && (!__CFBitIsSet(req->flags, HAS_PAYLOAD) || __CFBitIsSet(req->flags, PAYLOAD_IS_DATA))) {
             *advanceToNextProxy = TRUE;
@@ -991,7 +991,7 @@ static void haveBeenOrphaned1(_CFHTTPRequest *req, int oldState, CFStreamError *
 
     *haveBeenDealloced = FALSE;
     shouldReattempt = shouldReattemptRequest(req, err, oldState, conn, &advanceToNextProxy);
-    
+
     if (shouldReattempt) {
         if (!performReattempt(req, advanceToNextProxy)) {
             // report the error that caused the reattempt, not the new error
@@ -1075,12 +1075,12 @@ static Boolean transmitRequest1(_CFHTTPRequest *http, CFWriteStreamRef destStrea
     UInt8 buf[BUF_SIZE];
     const UInt8 *bytes;
     error->error = 0;
-    
+
     if (__CFBitIsSet(http->flags, HAVE_SENT_REQUEST_PAYLOAD)) return TRUE;
-    
+
 	if (CFWriteStreamCopyProperty(destStream, _kCFStreamPropertyHTTPSProxyHoldYourFire))
 		return TRUE;
-	
+
     // if http->requestPayload is NULL, we still need to wait until the write stream reports canAcceptBytes, because otherwise, our request header hasn't been sent.
     if (http->requestPayload == NULL) {
         if (CFWriteStreamCanAcceptBytes(destStream)) {
@@ -1303,7 +1303,7 @@ static void setConnectionFromProxyStream(_CFHTTPRequest *http, CFStreamError *er
     CFRelease(http->proxyStream);
     http->proxyStream = NULL;
     if (!http->proxyList || CFArrayGetCount(http->proxyList) == 0) {
-        // Error 
+        // Error
         err->domain = kCFStreamErrorDomainHTTP;
         err->error = kCFStreamErrorHTTPParseFailure;
     } else {
@@ -1316,7 +1316,7 @@ static void setConnectionFromProxyStream(_CFHTTPRequest *http, CFStreamError *er
 			// the pipe and it might take >1 message to complete the protocol.
 			__CFBitSet(http->flags, IS_PERSISTENT);
 		}
-		
+
 		CFHTTPMessageRef request = http->currentRequest ? http->currentRequest : http->originalRequest;
         CFURLRef targetURL = CFHTTPMessageCopyRequestURL(request);
         _CFNetConnectionCacheKey key = nextConnectionCacheKeyFromProxyArray(http, http->proxyList, targetURL, http->connProps);
@@ -1328,26 +1328,26 @@ static void setConnectionFromProxyStream(_CFHTTPRequest *http, CFStreamError *er
 		__CFSpinUnlock(&cacheInitLock);
         http->conn = findOrCreateNetConnection(httpConnectionCache, CFGetAllocator(http->responseStream), &httpConnectionCallBacks, key, key, isPersistent(http), http->connProps);
         releaseConnectionCacheKey(key);
-		
+
 		if ((auth || proxyAuth) && http->conn) {
-			
+
 			err->error = 0;
 			err->domain = 0;
-			
+
 			if (auth)
 				*err = _CFHTTPAuthenticationApplyHeaderToRequest(auth, request, http->conn);
-			
+
 			if (!err->error && proxyAuth)
 				*err = _CFHTTPAuthenticationApplyHeaderToRequest(proxyAuth, request, http->conn);
-			
+
 			if (err->error) {
 				CFRelease(http->conn);
 				http->conn = NULL;
-				
+
 				return;		/* NOTE the early bail! */
 			}
 		}
-		
+
         _CFNetConnectionEnqueue(http->conn, http);
         if (!isPersistent(http)) {
             _CFNetConnectionSetAllowsNewRequests(http->conn, FALSE);
@@ -1389,13 +1389,13 @@ static _CFNetConnectionRef getConnectionForRequest(_CFHTTPRequest *req, Boolean 
 #endif
     auth = connectionOrientedAuth(req, FALSE);
 	proxyAuth = connectionOrientedAuth(req, TRUE);
-	
+
     if (auth || proxyAuth) {
         // Connection-oriented auth schemes must be persistent, since you're authenticating
 		// the pipe and it might take >1 message to complete the protocol.
         __CFBitSet(req->flags, IS_PERSISTENT);
 	}
-		
+
     CFURLRef targetURL = CFHTTPMessageCopyRequestURL(req->currentRequest ? req->currentRequest : req->originalRequest);
     CFStringRef scheme = targetURL ? CFURLCopyScheme(targetURL) : NULL;
     if (!targetURL) {
@@ -1418,7 +1418,7 @@ static _CFNetConnectionRef getConnectionForRequest(_CFHTTPRequest *req, Boolean 
             }
             req->proxyList = _CFNetworkFindProxyForURLAsync(proxyScheme, targetURL, NULL, req->proxyDict, proxyInfoAvailable, req, &proxyStream);
         }
-    
+
         if (!req->proxyList) {
             CFArrayRef rlArray = _CFReadStreamGetRunLoopsAndModes(req->responseStream);
             CFIndex count;
@@ -1450,96 +1450,96 @@ static _CFNetConnectionRef getConnectionForRequest(_CFHTTPRequest *req, Boolean 
             releaseConnectionCacheKey(key);
         }
     }
-	
+
     if ((auth || proxyAuth) && conn) {
-		
+
 		if (auth)
 			*error = _CFHTTPAuthenticationApplyHeaderToRequest(auth, req->currentRequest, conn);
-		
+
 		if (!error->error && proxyAuth) {
-			
+
 			*error = _CFHTTPAuthenticationApplyHeaderToRequest(proxyAuth, req->currentRequest, conn);
-			
+
 			if (!error->error) {
-				
+
 				CFStringRef method = CFHTTPAuthenticationCopyMethod(proxyAuth);
-				
+
 				if (method && (CFStringCompare(method, _kCFNTLMMethod, kCFCompareCaseInsensitive) == kCFCompareEqualTo)) {
-					
+
 					if (scheme && (CFStringCompare(scheme, _kCFHTTPStreamHTTPSScheme, kCFCompareCaseInsensitive) == kCFCompareEqualTo)) {
-						
+
 						CFAllocatorRef alloc = CFGetAllocator(req->responseStream);
 						CFMutableDictionaryRef new_value = NULL;
 						CFStringRef header;
 						CFDictionaryRef property = CFWriteStreamCopyProperty(_CFNetConnectionGetRequestStream(conn), kCFStreamPropertyCONNECTProxy);
-						
+
 						if (!property)
 							property = CFDictionaryGetValue(req->connProps, kCFStreamPropertyCONNECTProxy);
-						
+
 						//_CFHTTPAuthenticationApplyHeaderToRequest(proxyAuth, req->currentRequest, conn);
-						
+
 						new_value = property ? CFDictionaryCreateMutableCopy(alloc, 0, property) : CFDictionaryCreateMutable(alloc, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 						if (property) CFRelease(property);
-						
+
 						header = CFHTTPMessageCopyHeaderFieldValue(req->currentRequest, _kCFHTTPStreamProxyAuthorizationHeader);
 						if (header) {
-							
+
 							CFMutableDictionaryRef headers = NULL;
-							
+
 							property = CFDictionaryGetValue(new_value, kCFStreamPropertyCONNECTAdditionalHeaders);
-							
+
 							if (property)
 								headers = CFDictionaryCreateMutableCopy(alloc, 0, property);
 							else
 								headers = CFDictionaryCreateMutable(alloc, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-							
+
 							CFDictionarySetValue(headers, _kCFHTTPStreamProxyAuthorizationHeader, header);
 							CFRelease(header);
 
 							CFDictionarySetValue(headers, _kCFHTTPStreamProxyConnectionHeader, _kCFHTTPStreamConnectionKeepAlive);
-							
+
 							CFDictionarySetValue(new_value, kCFStreamPropertyCONNECTAdditionalHeaders, headers);
 							CFRelease(headers);
 						}
-						
+
 						CFWriteStreamSetProperty(_CFNetConnectionGetRequestStream(conn), kCFStreamPropertyCONNECTProxy, new_value);
-						
+
 						CFRelease(new_value);
 					}
 				}
-				
+
 				if (method) CFRelease(method);
 			}
 		}
-		
+
 		if (error->error) {
 			CFRelease(conn);
 			conn = NULL;
 		}
     }
-	
+
 	if (scheme) CFRelease(scheme);
-	
+
     if (targetURL) CFRelease(targetURL);
 
     return conn;
 }
 
 static void _CFStreamSocketCreatedCallBack(int fd, void* ctxt) {
-	
+
 	int yes = 1;
-	
+
 	(void)ctxt;		/* unused */
-	
+
 	setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void*)&yes, sizeof(yes));
 }
 
 static CFStreamError httpCreateConnectionStreams(CFAllocatorRef alloc, const void *info, CFWriteStreamRef *requestStream, CFReadStreamRef *responseStream) {
     const _CFNetConnectionCacheKey key = (_CFNetConnectionCacheKey)info;
-    
+
     CFReadStreamRef rStream;
     CFWriteStreamRef wStream;
-    
+
     CFStreamError err = {0, 0};
     CFIndex count;
     CFArrayRef array;
@@ -1547,9 +1547,9 @@ static CFStreamError httpCreateConnectionStreams(CFAllocatorRef alloc, const voi
     SInt32 port;
     UInt32 connType;
     CFDictionaryRef properties;
-    
+
     getValuesFromKey(key, &host, &port, &connType, &properties);
-    
+
     if (properties && (array = CFDictionaryGetValue(properties, _kCFStreamPropertyHTTPConnectionStreams)) != NULL) {
         rStream = (CFReadStreamRef)CFArrayGetValueAtIndex(array, 0);
         wStream = (CFWriteStreamRef)CFArrayGetValueAtIndex(array, 1);
@@ -1567,9 +1567,9 @@ static CFStreamError httpCreateConnectionStreams(CFAllocatorRef alloc, const voi
             err.error = ENOMEM;
             return err;
         }
-		
+
 		callback = CFArrayCreate(alloc, values, sizeof(values) / sizeof(values[0]), &cb);
-		
+
 		if (callback) {
 			CFWriteStreamSetProperty(wStream, _kCFStreamSocketCreatedCallBack, callback);
 			CFRelease(callback);
@@ -1586,7 +1586,7 @@ static CFStreamError httpCreateConnectionStreams(CFAllocatorRef alloc, const voi
     *responseStream = CFReadStreamCreateHTTPStream(alloc, rStream, TRUE);
     CFReadStreamSetProperty(*responseStream, _kCFStreamPropertyHTTPPersistent, kCFBooleanTrue);
     CFRelease(rStream);
- 
+
     if (properties && (count = CFDictionaryGetCount(properties)) > 0) {
         CFStringRef *keys = CFAllocatorAllocate(alloc, sizeof(CFStringRef)*count*2, 0);
         CFTypeRef *values = (CFTypeRef *)(keys + count);
@@ -1598,7 +1598,7 @@ static CFStreamError httpCreateConnectionStreams(CFAllocatorRef alloc, const voi
         }
         CFAllocatorDeallocate(alloc, keys);
     }
-    
+
     return err;
 }
 
@@ -1623,11 +1623,11 @@ static Boolean resetForRequest(CFHTTPMessageRef newRequest, _CFHTTPRequest *http
     if (!http->conn) {
         Boolean dummy;
         http->conn = getConnectionForRequest(http, &dummy, error);
-    } 
+    }
     if (error->domain != 0) {
         return FALSE;
     } else if (!http->conn) {
-        // Asynchronous discovery of the correct connection; getConnectionForRequest took care of setting everything up 
+        // Asynchronous discovery of the correct connection; getConnectionForRequest took care of setting everything up
         return TRUE;
     } else {
         _CFNetConnectionEnqueue(http->conn, http);
@@ -1779,7 +1779,7 @@ static void addAuthenticationInfoToResponse1(_CFHTTPRequest *http) {
     }
     _CFHTTPMessageSetResponseURL(http->responseHeaders, requestedURL);
     CFRelease(requestedURL);
-	
+
     // Update auth token if there is one
     auth = _CFHTTPMessageGetAuthentication(http->originalRequest, FALSE);
     if (auth) {
@@ -1787,7 +1787,7 @@ static void addAuthenticationInfoToResponse1(_CFHTTPRequest *http) {
 		if (!persistent)
 			_CFHTTPAuthenticationDisassociateConnection(auth, conn);
     }
-	
+
 	// Update the proxy auth if there is one
     auth = _CFHTTPMessageGetAuthentication(http->originalRequest, TRUE);
     if (auth) {
@@ -1803,7 +1803,7 @@ static Boolean checkHeaders(_CFHTTPRequest *http, CFReadStreamRef stream, CFStre
     CFURLRef nextURL = NULL;
     Boolean result = TRUE;
     int nextAction;
-    
+
     if (!stream) {
         CFLog(0, CFSTR("Internal consistency check error for http request 0x%x"), http);
         error->domain = kCFStreamErrorDomainHTTP;
@@ -1823,7 +1823,7 @@ static Boolean checkHeaders(_CFHTTPRequest *http, CFReadStreamRef stream, CFStre
     } else {
         nextAction = nextActionForHeaders(http->responseHeaders, http, &nextURL, connectionStaysPersistent); // This routine guarantees haveCheckedHeaders() will return TRUE next time if nextAction is OK
     }
-	
+
 	/*
 	 ** This was moved here fromhttpResponseStreamCallBack in order to properly mark
 	 ** the state of the connection so NTLM fail-over works.
@@ -1837,7 +1837,7 @@ static Boolean checkHeaders(_CFHTTPRequest *http, CFReadStreamRef stream, CFStre
 #endif
 		}
 	}
-	
+
 	/* Make this last so state is good before carryover work for authentication. */
 	if (http->responseHeaders)
 		addAuthenticationInfoToResponse1(http);
@@ -1856,7 +1856,7 @@ static Boolean checkHeaders(_CFHTTPRequest *http, CFReadStreamRef stream, CFStre
             CFArrayAppendValue(http->redirectedURLs, nextURL);
             dequeueFromConnection1(http);
             closeRequestResources1(http);
-            
+
             // This forces the proxy list to be recomputed, which we need to do since currently it only holds the remaining rollover possibilities - REW
             CFRelease(http->proxyList);
             http->proxyList = NULL;
@@ -1973,7 +1973,7 @@ static CFIndex httpRequestRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex bu
                 CFRunLoopRunInMode(mode, 1e+20, TRUE);
             }
             setConnectionFromProxyStream(req, error);
-            if (error->domain != 0) { 
+            if (error->domain != 0) {
                 return -1;
             }
         }
@@ -1995,7 +1995,7 @@ static CFIndex httpRequestRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex bu
             req->stateChangeSource = CFRunLoopSourceCreate(CFGetAllocator(stream), 0, &rlsCtxt);
         }
         CFRunLoopAddSource(currentRL, req->stateChangeSource, mode);
-    
+
         // Poll once more to make sure events didn't get dropped while we were scheduling
         state = _CFNetConnectionGetState(oldConn, TRUE, req);
         while ((oldConn == req->conn) && state < kReceivingResponse) {
@@ -2037,7 +2037,7 @@ static CFIndex httpRequestRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex bu
             result = httpRequestRead(stream, buffer, bufferLength, error, atEOF, info);
         }
     }
-    return result;    
+    return result;
 }
 
 static Boolean httpRequestCanRead(CFReadStreamRef ourStream, void *info) {
@@ -2054,9 +2054,9 @@ static Boolean httpRequestCanRead(CFReadStreamRef ourStream, void *info) {
         if (err.domain != 0) {
             CFReadStreamSignalEvent(req->responseStream, kCFStreamEventErrorOccurred, &err);
             return FALSE;
-        } 
+        }
     }
-     
+
     if (req->proxyStream) {
         // proxyStream isn't done yet
         return FALSE;
@@ -2191,7 +2191,7 @@ static Boolean httpRequestSetProperty(CFReadStreamRef stream, CFStringRef proper
     _CFHTTPRequest *http = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
     fprintf(stderr, "httpRequestSetProperty(req = 0x%x)\n", (int)http);
-#endif 
+#endif
     if (CFReadStreamGetStatus(stream) > kCFStreamStatusNotOpen) return FALSE;
     if (CFEqual(propertyName, kCFStreamPropertyHTTPShouldAutoredirect)) {
         if (propertyValue == kCFBooleanTrue) {
@@ -2272,7 +2272,7 @@ static Boolean httpRequestSetProperty(CFReadStreamRef stream, CFStringRef proper
                 CFRelease(http->proxyDict);
                 http->proxyDict = mDict;
             }
-        }        
+        }
         return TRUE;
     } else if (CFEqual(propertyName, kCFStreamPropertyHTTPAttemptPersistentConnection)) {
         if (propertyValue == kCFBooleanTrue) {
@@ -2289,9 +2289,9 @@ static Boolean httpRequestSetProperty(CFReadStreamRef stream, CFStringRef proper
         // We own these (socket) properties; prevent the client from setting them
         return FALSE;
     } else if (CFEqual(propertyName, _kCFStreamPropertyHTTPConnectionStreams)) {
-        if (CFGetTypeID(propertyValue) != CFArrayGetTypeID() 
-            || CFArrayGetCount(propertyValue) != 2 
-            || CFGetTypeID(CFArrayGetValueAtIndex(propertyValue, 0)) != CFReadStreamGetTypeID() 
+        if (CFGetTypeID(propertyValue) != CFArrayGetTypeID()
+            || CFArrayGetCount(propertyValue) != 2
+            || CFGetTypeID(CFArrayGetValueAtIndex(propertyValue, 0)) != CFReadStreamGetTypeID()
             || CFGetTypeID(CFArrayGetValueAtIndex(propertyValue, 1)) != CFWriteStreamGetTypeID()) {
             return FALSE;
         } else {
@@ -2339,7 +2339,7 @@ static void httpRequestUnschedule(CFReadStreamRef stream, CFRunLoopRef runLoop, 
     }
 }
 
-static void requestPayloadCallBack(CFReadStreamRef stream, CFStreamEventType type, void *info) { 
+static void requestPayloadCallBack(CFReadStreamRef stream, CFStreamEventType type, void *info) {
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
     fprintf(stderr, "requestPayloadCallBack(req = 0x%x, event = %d)\n", (int)req, type);
@@ -2406,7 +2406,7 @@ extern Boolean canKeepAlive(CFHTTPMessageRef responseHeaders, CFHTTPMessageRef r
     if (!responseHeaders) {
         // 0.9 server
         return FALSE;
-    } 
+    }
     connectionHeader = CFHTTPMessageCopyHeaderFieldValue(responseHeaders, _kCFHTTPStreamProxyConnectionHeader);
 	if (!connectionHeader) {
 		connectionHeader = CFHTTPMessageCopyHeaderFieldValue(responseHeaders, _kCFHTTPStreamConnectionHeader);
@@ -2508,7 +2508,7 @@ void httpResponseStreamCallBack(void *theReq, CFReadStreamRef stream, CFStreamEv
             }
         }
         break;
-    case kCFStreamEventMarkEncountered: 
+    case kCFStreamEventMarkEncountered:
         if (!justReadMark && req->conn) {
             _CFNetConnectionResponseIsComplete(req->conn, req);
         }
@@ -2517,7 +2517,7 @@ void httpResponseStreamCallBack(void *theReq, CFReadStreamRef stream, CFStreamEv
         // This is an error for the connection if we do not own it and if we expected the connection to be persistent; otherwise it's o.k. and just means we're at the end of our response.  Regardless, we just signal EOF for us....
         if (isPersistent(req)) {
             _CFNetConnectionLost(req->conn); // This  will do the right thing if the connection had already been "lost" (marked as not persistent) once
-        } 
+        }
         if (!__CFBitIsSet(req->flags, IS_ZOMBIE)) {
             _CFReadStreamSignalEventDelayed(req->responseStream, kCFStreamEventEndEncountered, NULL);
         }

@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,15 +17,15 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*
  * spnegoKrb.cpp - Kerberos routines for SPNEGO tool
  *
- * Created July 7 2003 by dmitch 
+ * Created July 7 2003 by dmitch
  */
- 
+
 #include "spnegoKrb.h"
 #include <Kerberos/Kerberos.h>
 #include <stdio.h>
@@ -53,13 +53,13 @@ static void returns(void) { return; }
             sym##_proc = (rettype(*)arglist)NSAddressOfSymbol(NSLookupSymbolInImage((const mach_header*)KerberosLibrary, "_"#sym, NSLOOKUPSYMBOLINIMAGE_OPTION_BIND));	\
         if (! sym##_proc) sym##_proc = (rettype(*)arglist)alt;									\
     }
-    
+
 
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *ctxt) {
 
     GET_DYNAMIC_SYMBOL(krb5_init_context, krb5_error_code, (krb5_context *ctxt), returns_bad_int_return);
-    
+
     return (*krb5_init_context_proc)(ctxt);
 }
 
@@ -67,31 +67,31 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_default(krb5_context ctxt, krb5_ccache *cache) {
 
     GET_DYNAMIC_SYMBOL(krb5_cc_default, krb5_error_code, (krb5_context ctxt, krb5_ccache *cache), returns_bad_int_return);
-    
+
     return (*krb5_cc_default_proc)(ctxt, cache);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_get_principal (krb5_context context, krb5_ccache cache, krb5_principal *principal) {
-	
+
     GET_DYNAMIC_SYMBOL(krb5_cc_get_principal, krb5_error_code, (krb5_context context, krb5_ccache cache, krb5_principal *principal), returns_bad_int_return);
-    
+
     return (*krb5_cc_get_principal_proc)(context, cache, principal);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_sname_to_principal(krb5_context context, const char *hostname, const char *sname, krb5_int32 type, krb5_principal *principal) {
-	
+
     GET_DYNAMIC_SYMBOL(krb5_sname_to_principal, krb5_error_code, (krb5_context context, const char *hostname, const char *sname, krb5_int32 type, krb5_principal *principal), returns_bad_int_return);
-    
+
     return (*krb5_sname_to_principal_proc)(context, hostname, sname, type, principal);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_close(krb5_context context, krb5_ccache cache) {
-	
+
     GET_DYNAMIC_SYMBOL(krb5_cc_close, krb5_error_code, (krb5_context context, krb5_ccache cache), returns_bad_int_return);
-    
+
     return (*krb5_cc_close_proc)(context, cache);
 }
 
@@ -99,7 +99,7 @@ void KRB5_CALLCONV
 krb5_free_principal(krb5_context context, krb5_principal principal) {
 
     GET_DYNAMIC_SYMBOL(krb5_free_principal, void, (krb5_context context, krb5_principal principal), returns);
-    
+
     (*krb5_free_principal_proc)(context, principal);
 }
 
@@ -107,7 +107,7 @@ void KRB5_CALLCONV
 krb5_free_context(krb5_context context) {
 
     GET_DYNAMIC_SYMBOL(krb5_free_context, void, (krb5_context context), returns);
-    
+
     (*krb5_free_context_proc)(context);
 }
 
@@ -115,7 +115,7 @@ OM_uint32 KRB5_CALLCONV
 gss_init_sec_context(OM_uint32 *minor_status, gss_cred_id_t cred_handle, gss_ctx_id_t *context_handle, gss_name_t target_name, gss_OID mech_type, OM_uint32 req_flags, OM_uint32 time_req, gss_channel_bindings_t input_chan_bindings, gss_buffer_t input_token, gss_OID * actual_mech_type, gss_buffer_t output_token, OM_uint32 *ret_flags, OM_uint32 *time_rec ) {
 
     GET_DYNAMIC_SYMBOL(gss_init_sec_context, OM_uint32, (OM_uint32 *minor_status, gss_cred_id_t cred_handle, gss_ctx_id_t *context_handle, gss_name_t target_name, gss_OID mech_type, OM_uint32 req_flags, OM_uint32 time_req, gss_channel_bindings_t input_chan_bindings, gss_buffer_t input_token, gss_OID * actual_mech_type, gss_buffer_t output_token, OM_uint32 *ret_flags, OM_uint32 *time_rec), returns_bad_int_return);
-    
+
     return (*gss_init_sec_context_proc)(minor_status, cred_handle, context_handle, target_name, mech_type, req_flags, time_req, input_chan_bindings, input_token, actual_mech_type, output_token, ret_flags, time_rec);
 }
 
@@ -123,15 +123,15 @@ OM_uint32 KRB5_CALLCONV
 gss_delete_sec_context(OM_uint32 *minor_status, gss_ctx_id_t *context_handle, gss_buffer_t output_token)
 {
 	GET_DYNAMIC_SYMBOL(gss_delete_sec_context, OM_uint32, (OM_uint32 *minor_status, gss_ctx_id_t *context_handle, gss_buffer_t output_token), returns_bad_int_return);
-    
-    return (*gss_delete_sec_context_proc)(minor_status, context_handle, output_token);	
+
+    return (*gss_delete_sec_context_proc)(minor_status, context_handle, output_token);
 }
 
 OM_uint32 KRB5_CALLCONV
 gss_import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer, gss_OID input_name_type, gss_name_t *output_name )
 {
     GET_DYNAMIC_SYMBOL(gss_import_name, OM_uint32, (OM_uint32 *minor_status, gss_buffer_t input_name_buffer, gss_OID input_name_type, gss_name_t *output_name), returns_bad_int_return);
-    
+
     return (*gss_import_name_proc)(minor_status, input_name_buffer, input_name_type, output_name);
 }
 
@@ -139,7 +139,7 @@ OM_uint32 KRB5_CALLCONV
 gss_release_name(OM_uint32 *minor_status, gss_name_t *input_name)
 {
     GET_DYNAMIC_SYMBOL(gss_release_name, OM_uint32, (OM_uint32 *minor_status, gss_name_t *input_name), returns_bad_int_return);
-    
+
     return (*gss_release_name_proc)(minor_status, input_name);
 }
 
@@ -147,7 +147,7 @@ OM_uint32 KRB5_CALLCONV
 gss_release_buffer(OM_uint32 *minor_status, gss_buffer_t buffer)
 {
     GET_DYNAMIC_SYMBOL(gss_release_buffer, OM_uint32, (OM_uint32 *minor_status, gss_buffer_t buffer), returns_bad_int_return);
-    
+
     return (*gss_release_buffer_proc)(minor_status, buffer);
 }
 
@@ -169,20 +169,20 @@ krb5_error_code GetSvcTicketForHost(const char *inHostname,
     gss_name_t			gssServicePrincipal		= GSS_C_NO_NAME;
     gss_ctx_id_t		gssContext				= GSS_C_NO_CONTEXT;
     OM_uint32			minorStatus;
-	
+
 	*outTicketLen = 0;
 	*outTicket = NULL;
-	
+
 	if (!strcmp(inHostname, "localhost"))
 		inHostname = NULL;
-	
+
 	if((kerr = krb5_init_context(&kctx)))
 		goto out;
-	
+
 	// since there is no name available, there is no reason not to use the default cache
 	if ((kerr = krb5_cc_default(kctx, &kcc)))
         goto out;
-    
+
 	// if no error is returned, then there is a valid cache setup already, otherwise don't try SPNEGO
 	if ((kerr = krb5_cc_get_principal(kctx, kcc, &kuserPrinc)))
         goto out;
@@ -190,16 +190,16 @@ krb5_error_code GetSvcTicketForHost(const char *inHostname,
 	// this prevents reverse lookup issues for AD environments, if name is unparsed it does a lookup
 	if ((kerr = krb5_sname_to_principal(kctx, inHostname, inServiceType, KRB5_NT_UNKNOWN, &kservPrinc)))
 		goto out;
-	
+
     gss_buffer_desc		inputName; // do not release
 
 	inputName.value = &kservPrinc;
     inputName.length = sizeof( krb5_principal );
-    
+
     kerr = gss_import_name( &minorStatus, &inputName, &gss_nt_krb5_principal, &gssServicePrincipal );
     if( kerr != GSS_S_COMPLETE )
-        goto out;    
-    
+        goto out;
+
     kerr = gss_init_sec_context(
                                        &minorStatus,               /* minor_status */
                                        GSS_C_NO_CREDENTIAL,        /* claimant_cred_handle */
@@ -230,25 +230,25 @@ krb5_error_code GetSvcTicketForHost(const char *inHostname,
 	gss_release_buffer(&minorStatus, &outputToken);
 
 out:
-		
+
 	if(gssContext != GSS_C_NO_CONTEXT)
 		gss_delete_sec_context(&minorStatus, &gssContext, GSS_C_NO_BUFFER);
-	
+
 	if(gssServicePrincipal != GSS_C_NO_NAME)
 		gss_release_name(&minorStatus, &gssServicePrincipal);
-	
+
 	if(kservPrinc)
 		krb5_free_principal(kctx, kservPrinc);
-	
+
 	if(kuserPrinc)
 		krb5_free_principal(kctx, kuserPrinc);
-	
+
 	if(kcc)
 		krb5_cc_close(kctx,kcc);
-	
+
 	if(kctx)
 		krb5_free_context(kctx);
-	
+
 	return kerr;
 }
 

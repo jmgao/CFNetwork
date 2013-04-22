@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*
@@ -57,12 +57,12 @@
 #include <stdio.h>
 
 
-extern 
+extern
 int _CFNetDiagnosticPing(CFStringRef HostToPing, const int NumberOfPacketsToSend, const int PingTimeoutInSeconds);
 
 const char * CFNetDiagnosticNotifyKey = "com.apple.NetworkDiagnostics.notification";
 
-/* 
+/*
 	**INTERNAL SCHEMA INFO**
 	details schema
 
@@ -79,10 +79,10 @@ Usage:
 	and potentially to get the icon. If the application wants to override that
 	behaviour it may pass a name instead. In that cas the app is responsible for
 	localizing the string before it passes it to us.
-	
+
 	The rest of the dictionary values can be used to help Network Diagnostics attempt
-	to analyze the problem. 
-	
+	to analyze the problem.
+
 */
 
 const CFStringRef CFNetDiagnosticProtocolHTTP = CFSTR("http");
@@ -94,7 +94,7 @@ const CFStringRef CFNetDiagnosticProtocolUnknown = CFSTR("unknown");
 
 #if 0
 
-/*  This is used for debugging. I should also conditionalize it on an environment variable in case any 
+/*  This is used for debugging. I should also conditionalize it on an environment variable in case any
 	calls are accidentally left in the code.
 */
 
@@ -103,7 +103,7 @@ void _CFNetDiagnosticsPrintObject(CFTypeRef object) {
 	char buffer[32768];
 	Boolean converted;
 	CFStringRef desc;
-	
+
 	desc = CFCopyDescription(object);
 	if(desc) {
 		converted = CFStringGetCString(desc, buffer, 32768, kCFStringEncodingASCII);
@@ -117,7 +117,7 @@ void _CFNetDiagnosticsPrintObject(CFTypeRef object) {
 
 #endif
 
-/*  
+/*
 	I am a big believer in static functions. Anything you repeated 3 times
 	in a row should be refactored into them.
 */
@@ -129,7 +129,7 @@ void _CFNetDiagnosticSetDictionaryKeyIfNotNull(	CFStringRef key,
 	if(key != NULL && value != NULL) {
 		CFDictionaryAddValue(dict, key, value);
 	}
-	
+
 }
 
 static
@@ -144,7 +144,7 @@ void _CFNetDiagnosticSetDictionaryKeyAndReleaseIfNotNull(	CFStringRef key,
 	}
 }
 
-static 
+static
 CFTypeRef _CFNetDiagnosticGetValueFromDictionaryAndRetain(CFDictionaryRef dict, CFStringRef key) {
 	CFTypeRef s;
 
@@ -152,79 +152,79 @@ CFTypeRef _CFNetDiagnosticGetValueFromDictionaryAndRetain(CFDictionaryRef dict, 
 	if(s != NULL) {
 		CFRetain(s);
 	}
-	
+
 	return s;
 }
 
 /*  Okay, _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage is tricky. I use it to avoid doing this:
-	
+
 	pattern = SCDynamicStoreKeyCreateNetworkServiceEntity(allocator, arg1, arg2, arg3);
 	if(pattern) {
 		dict = SCDynamicStoreCopyValue( store, pattern );
 		CFRelease(pattern);
 	}
-	
+
 	in a bunch of places in the code. Afterall, if I am going to generate an SCDS pattern from one of the
 	provided functions the only thing I am possibly going to do with it is call SCDynamicStoreCopyValue.
 */
 
 static
-CFDictionaryRef _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(CFAllocatorRef allocator, SCDynamicStoreRef store, 
+CFDictionaryRef _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(CFAllocatorRef allocator, SCDynamicStoreRef store,
 	CFStringRef(*SCFunc)(CFAllocatorRef, CFStringRef, CFStringRef, CFStringRef), CFStringRef arg1, CFStringRef arg2, CFStringRef arg3) {
 	CFStringRef pattern = NULL;
 	CFDictionaryRef dict = NULL;
 
-	
-	
+
+
 	pattern = SCFunc(allocator, arg1, arg2, arg3);
 	if(pattern) {
 		dict = SCDynamicStoreCopyValue( store, pattern );
 		CFRelease(pattern);
 	}
-	
+
 	return dict;
 }
 
 
 CFNetDiagnosticRef CFNetDiagnosticCreateBasic(	CFAllocatorRef allocator,
-											CFStringRef remoteHost, 
-											CFStringRef protocol, 
+											CFStringRef remoteHost,
+											CFStringRef protocol,
 											CFNumberRef port) {
 	CFMutableDictionaryRef retval = NULL;
-	
+
 	retval = CFDictionaryCreateMutable(allocator, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-	
+
 	if(retval != NULL) {
-		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticNameKey, CFBundleGetValueForInfoDictionaryKey(CFBundleGetMainBundle(), kCFBundleNameKey), retval);		
+		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticNameKey, CFBundleGetValueForInfoDictionaryKey(CFBundleGetMainBundle(), kCFBundleNameKey), retval);
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticBundleKey, CFBundleGetIdentifier( CFBundleGetMainBundle() ), retval);
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticRemoteHostKey, remoteHost, retval);
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticProtocolKey, protocol, retval);
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticPortKey, port, retval);
-		
+
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticMethodKey, CFSTR("CFNetDiagnosticCreateBasic"), retval);
 	}
-	
+
 	return (CFNetDiagnosticRef)retval;
-}	
-	
+}
+
 CFNetDiagnosticRef CFNetDiagnosticCreateWithURL(CFAllocatorRef allocator, CFURLRef url) {
 	CFMutableDictionaryRef retval;
 	SInt32 port = 0;
-	
+
 	retval = CFDictionaryCreateMutable(allocator, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-	
+
 	if(retval != NULL && CFURLCanBeDecomposed(url)) {
 		port = CFURLGetPortNumber(url);
-		
-		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticNameKey, CFBundleGetValueForInfoDictionaryKey(CFBundleGetMainBundle(), kCFBundleNameKey), retval);		
+
+		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticNameKey, CFBundleGetValueForInfoDictionaryKey(CFBundleGetMainBundle(), kCFBundleNameKey), retval);
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticBundleKey, CFBundleGetIdentifier( CFBundleGetMainBundle() ), retval);
 		_CFNetDiagnosticSetDictionaryKeyAndReleaseIfNotNull(_CFNetDiagnosticRemoteHostKey, CFURLCopyHostName(url), retval);
 		_CFNetDiagnosticSetDictionaryKeyAndReleaseIfNotNull(_CFNetDiagnosticProtocolKey, CFURLCopyScheme(url), retval);
 		_CFNetDiagnosticSetDictionaryKeyAndReleaseIfNotNull(_CFNetDiagnosticPortKey, CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &port), retval);
-		
+
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticMethodKey, CFSTR("CFNetDiagnosticCreateWithURL"), retval);
 	}
-	
+
 	return (CFNetDiagnosticRef)retval;
 }
 
@@ -234,9 +234,9 @@ CFNetDiagnosticRef CFNetDiagnosticCreateWithStreams(CFAllocatorRef allocator, CF
 #if 0
 	CFArrayRef hostnames;
 	CFHostRef host;
-#endif	
+#endif
 	retval = CFDictionaryCreateMutable(allocator, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-	
+
 	if(retval != NULL) {
 #if 0
 		host = (CFHostRef)CFReadStreamCopyProperty(readStream, kCFStreamPropertySocketRemoteHost);
@@ -246,39 +246,39 @@ CFNetDiagnosticRef CFNetDiagnosticCreateWithStreams(CFAllocatorRef allocator, CF
 			CFRelease(host);
 		}
 #endif
-		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticNameKey, CFBundleGetValueForInfoDictionaryKey(CFBundleGetMainBundle(), kCFBundleNameKey), retval);		
+		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticNameKey, CFBundleGetValueForInfoDictionaryKey(CFBundleGetMainBundle(), kCFBundleNameKey), retval);
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticBundleKey, CFBundleGetIdentifier( CFBundleGetMainBundle() ), retval);
-	
+
 		_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticMethodKey, CFSTR("CFNetDiagnosticCreateWithStreams"), retval);
 	}
-	
+
 	return (CFNetDiagnosticRef)retval;
 }
 
 void CFNetDiagnosticSetName(CFNetDiagnosticRef details, CFStringRef name) {
 	CFMutableDictionaryRef detailsDict = (CFMutableDictionaryRef)details;
-	
+
 	_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticNameKey, name, detailsDict);
-} 
+}
 
 void CFNetDiagnosticSetProtocol(CFNetDiagnosticRef details, CFStringRef service) {
 	CFMutableDictionaryRef detailsDict = (CFMutableDictionaryRef)details;
-	
+
 	_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticProtocolKey, service, detailsDict);
-} 
-	
+}
+
 void CFNetDiagnosticSetServiceID(CFNetDiagnosticRef details, CFStringRef service) {
 	CFMutableDictionaryRef detailsDict = (CFMutableDictionaryRef)details;
-	
+
 	_CFNetDiagnosticSetDictionaryKeyIfNotNull(_CFNetDiagnosticServiceIDKey, service, detailsDict);
-} 
+}
 
 CFNetDiagnosticStatus CFNetDiagnosticDiagnoseProblemInteractively(CFNetDiagnosticRef details) {
 	SInt32 retval = 0;
 	mach_port_t port = MACH_PORT_NULL;
 	CFDataRef msgData = NULL;
 	kern_return_t err;
-	
+
 	//build message
 	CFWriteStreamRef stream = CFWriteStreamCreateWithAllocatedBuffers(kCFAllocatorDefault, kCFAllocatorDefault);
 	CFWriteStreamOpen(stream);
@@ -288,11 +288,11 @@ CFNetDiagnosticStatus CFNetDiagnosticDiagnoseProblemInteractively(CFNetDiagnosti
 		msgData = CFWriteStreamCopyProperty(stream, kCFStreamPropertyDataWritten);
 	}
 	CFRelease(stream);
-	
+
 
 	if(msgData) {
 		err = bootstrap_look_up(bootstrap_port, *((name_t*)(&_CFNetDiagnosticMachPortName)), &port);
-		
+
 		if (err == KERN_SUCCESS) {
 			err = _CFNetDiagnosticClient_passDescriptor(	port,
                                                                         _CFNetDiagnosticMachProtocolVersion,
@@ -301,21 +301,21 @@ CFNetDiagnosticStatus CFNetDiagnosticDiagnoseProblemInteractively(CFNetDiagnosti
 			if (err == KERN_SUCCESS) {
 				//FIXME Yay!!!
 			}
-			
+
 		}
-		
+
 		CFRelease(msgData);
 	}
-	
+
 	return (CFNetDiagnosticStatus)retval;
 }
 
-static 
+static
 CFStringRef copyCurrentRouter(void) {
 	SCDynamicStoreRef store;
 	CFPropertyListRef propList;
 	CFStringRef retval = NULL;
-	
+
 	store = SCDynamicStoreCreate(kCFAllocatorDefault, CFSTR("Network Diagnostics"), NULL, NULL);
 
 	if(store) {
@@ -329,16 +329,16 @@ CFStringRef copyCurrentRouter(void) {
 		}
 		CFRelease(store);
 	}
-	
+
 	return retval;
 }
 
-static 
+static
 CFStringRef copyCurrentPrimaryService(void) {
 	SCDynamicStoreRef store;
 	CFPropertyListRef propList;
 	CFStringRef retval = NULL;
-	
+
 	store = SCDynamicStoreCreate(kCFAllocatorDefault, CFSTR("Network Diagnostics"), NULL, NULL);
 
 	if(store) {
@@ -352,7 +352,7 @@ CFStringRef copyCurrentPrimaryService(void) {
 		}
 		CFRelease(store);
 	}
-	
+
 	return retval;
 }
 
@@ -364,7 +364,7 @@ CFArrayRef copyCurrentDNSServers(void) {
 	CFStringRef scdsRegexp;
 	CFArrayRef retval = NULL;
 	CFStringRef serviceID;
-	
+
 	serviceID = copyCurrentPrimaryService();
 	if(serviceID) {
 
@@ -373,7 +373,7 @@ CFArrayRef copyCurrentDNSServers(void) {
 						kSCDynamicStoreDomainState,
 						serviceID,
 						kSCEntNetDNS);
-		
+
 		if(scdsRegexp) {
 
 			store = SCDynamicStoreCreate(kCFAllocatorDefault, CFSTR("Network Diagnostics"), NULL, NULL);
@@ -387,16 +387,16 @@ CFArrayRef copyCurrentDNSServers(void) {
 					}
 					CFRelease(propList);
 				}
-				
+
 				CFRelease(store);
 			}
 
 			CFRelease(scdsRegexp);
 		}
-		
+
 		CFRelease(serviceID);
 	}
-	
+
 	return retval;
 }
 
@@ -415,21 +415,21 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusActively(CFNetDiagnosticRe
 	CFIndex i;
 	bool nameServerResponded;
 
-	//Get a timestamp	
+	//Get a timestamp
 	timestamp = mach_absolute_time();
-	
+
 	err = mach_timebase_info(&timebase);
 
 	if(err == KERN_SUCCESS) {
 		conversion_factor = 1e-9 * (double)(timebase.numer) / (double)(timebase.denom);
 		retval = CFNetDiagnosticCopyNetworkStatusPassively(details, description);
-	
+
 		if (retval != kCFNetDiagnosticConnectionUp) {
 			if (CFNumberGetValue(timeout, kCFNumberIntType, &timeout_value)) {
-			
+
 				//Get current time remaining
 				running_timeout = timeout_value - conversion_factor * (mach_absolute_time() - timestamp);
-			
+
 				pingTarget = copyCurrentRouter();
 				if (pingTarget) {
 					if(_CFNetDiagnosticPing(pingTarget, 1, running_timeout)) {
@@ -443,20 +443,20 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusActively(CFNetDiagnosticRe
 						}
 					} else {
 						CFRelease(pingTarget);
-						
+
 						nameServers = copyCurrentDNSServers();
-						
+
 						if (nameServers) {
 							nameServerCount = CFArrayGetCount(nameServers);
-							
+
 							//Get current time remaining
 							running_timeout = ((timeout_value - conversion_factor * (mach_absolute_time() - timestamp)) / nameServerCount);
-			
+
 							//ping a nameserver
 							nameServerResponded = false;
 							for (i=0; i < nameServerCount; i++) {
 								pingTarget = CFArrayGetValueAtIndex(nameServers, i);
-							
+
 								if (!nameServerResponded) {
 									if(!_CFNetDiagnosticPing(pingTarget, 1, running_timeout)) {
 										nameServerResponded = true;
@@ -464,7 +464,7 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusActively(CFNetDiagnosticRe
 								}
 							}
 							CFRelease(nameServers);
-							
+
 							if (!nameServerResponded) {
 								retval = kCFNetDiagnosticConnectionDown;
 								if (description) {
@@ -476,7 +476,7 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusActively(CFNetDiagnosticRe
 							} else {
 								//Get current time remaining
 								running_timeout = timeout_value - conversion_factor * (mach_absolute_time() - timestamp);
-			
+
 								//Server router
 								pingTarget = CFDictionaryGetValue((CFDictionaryRef)details, _CFNetDiagnosticRemoteHostKey);
 								if(pingTarget) {
@@ -505,7 +505,7 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusActively(CFNetDiagnosticRe
 			}
 		}
 	}
-	
+
 	//FIXME
 	return retval;
 }
@@ -525,7 +525,7 @@ Boolean _CFNetDiagnosticIsLinkLocal (CFStringRef s)
 			retval = 0;
 		} else {
 			retval = IN_LINKLOCAL(ntohl(addr));
-		} 
+		}
 	}
 
 	 return retval;
@@ -546,10 +546,10 @@ CFNetDiagnosticStatus _CFNetDiagnosticCopyNetworkStatusPassivelyInterfaceSpecifi
 	Boolean isLinkActive = 0;
 	Boolean isConnected = 0;
 	Boolean isLinkLocal = 0;
-	
+
 
 	//First we get basic Information about the device
-	dict = _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(NULL, store, SCDynamicStoreKeyCreateNetworkServiceEntity, 
+	dict = _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(NULL, store, SCDynamicStoreKeyCreateNetworkServiceEntity,
 		kSCDynamicStoreDomainSetup, serviceID, kSCEntNetInterface);
 
 	if(dict) {
@@ -557,13 +557,13 @@ CFNetDiagnosticStatus _CFNetDiagnosticCopyNetworkStatusPassivelyInterfaceSpecifi
 		device = (CFStringRef)_CFNetDiagnosticGetValueFromDictionaryAndRetain(dict, kSCPropNetInterfaceDeviceName);
 //		hardware = _CFNetDiagnosticGetValueFromDictionaryAndRetain(dict, kSCPropNetInterfaceHardware);
 //		isDialup = CFEqual(kSCValNetInterfaceTypePPP, CFDictionaryGetValue(dict, kSCPropNetInterfaceType));
-	
+
 		CFRelease(dict);
 	}
 
 	//Now we find out if the link is active
 	if(device) {
-		dict = _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(NULL, store, SCDynamicStoreKeyCreateNetworkInterfaceEntity, 
+		dict = _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(NULL, store, SCDynamicStoreKeyCreateNetworkInterfaceEntity,
 			kSCDynamicStoreDomainState, device, kSCEntNetLink);
 
 		if(dict) {
@@ -582,28 +582,28 @@ CFNetDiagnosticStatus _CFNetDiagnosticCopyNetworkStatusPassivelyInterfaceSpecifi
 		}
 		CFRelease(device);
 	}
-	
+
 	//Now we find out if the link is connected
-	dict = _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(NULL, store, SCDynamicStoreKeyCreateNetworkServiceEntity, 
+	dict = _CFNetDiagnosticsGetDataFromSCDSAndThowAwayGarbage(NULL, store, SCDynamicStoreKeyCreateNetworkServiceEntity,
 		kSCDynamicStoreDomainState, serviceID, kSCEntNetIPv4);
 
 	if(dict) {
 		isConnected = 1;
-    
+
 		addresses = CFDictionaryGetValue(dict, kSCPropNetIPv4Addresses);
 		if(CFArrayGetCount(addresses) > 0) {
 			address = CFArrayGetValueAtIndex(addresses, 0);
 		}
-    
+
 		if(address) {
 			isLinkLocal = _CFNetDiagnosticIsLinkLocal(address);
 		}
-		
+
 		CFRelease( (CFDictionaryRef) dict );
 	}
-	
 
-	
+
+
 	if(isLinkActive && isConnected) {
 		if(isLinkLocal) {
 			retval = kCFNetDiagnosticConnectionIndeterminate;
@@ -613,7 +613,7 @@ CFNetDiagnosticStatus _CFNetDiagnosticCopyNetworkStatusPassivelyInterfaceSpecifi
 	} else {
 		retval = kCFNetDiagnosticConnectionDown;
 	}
-	
+
 	return retval;
 }
 
@@ -624,12 +624,12 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusPassively(CFNetDiagnosticR
 	CFStringRef serviceID;
 	SCDynamicStoreRef store;
 
-	
+
 	store = SCDynamicStoreCreate(kCFAllocatorDefault, CFSTR("CFNetDiagnostics"), NULL, NULL);
-	
+
 	if(store) {
-	
-		
+
+
 		serviceID = CFDictionaryGetValue(detailsDict, _CFNetDiagnosticServiceIDKey);
 		if(serviceID) {
 			//If there is a specific ServiceID we only scan on it. We can only get in this position through SPIs
@@ -641,30 +641,30 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusPassively(CFNetDiagnosticR
 			CFArrayRef serviceOrder = NULL;
 			CFIndex i, count;
 			CFNetDiagnosticStatus serviceState = kCFNetDiagnosticConnectionDown;
-			
+
 			pattern = SCDynamicStoreKeyCreateNetworkGlobalEntity( NULL,
                                         (CFStringRef) kSCDynamicStoreDomainSetup,
                                         (CFStringRef) kSCEntNetIPv4 );
-			
+
 			if(pattern) {
 				dict =  SCDynamicStoreCopyValue( store, pattern );
 				CFRelease( pattern );
 			}
-			
+
 			if(dict) {
 				serviceOrder = CFDictionaryGetValue(dict, CFSTR("ServiceOrder"));
 				CFRetain(serviceOrder);
 				CFRelease(dict);
 			}
-			
+
 			if(serviceOrder) {
 				count = CFArrayGetCount(serviceOrder);
 				retval = kCFNetDiagnosticConnectionDown;
-				
+
 				for ( i = 0; i < count; i++ ) {
 					serviceID = CFArrayGetValueAtIndex(serviceOrder, i);
 					serviceState = _CFNetDiagnosticCopyNetworkStatusPassivelyInterfaceSpecific(store, serviceID, description);
-				
+
 					if(serviceState == kCFNetDiagnosticConnectionDown) {
 						retval = kCFNetDiagnosticConnectionDown;
 						if (description) {
@@ -698,9 +698,9 @@ CFNetDiagnosticStatus CFNetDiagnosticCopyNetworkStatusPassively(CFNetDiagnosticR
 				CFRelease(serviceOrder);
 			}
 		}
-	
+
 		CFRelease(store);
 	}
-	
+
 	return retval;
 }

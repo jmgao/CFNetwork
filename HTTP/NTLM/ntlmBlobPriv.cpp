@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,21 +17,21 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*
  * Copyright (c) 2000-2004 Apple Computer, Inc. All Rights Reserved.
- * 
+ *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -39,12 +39,12 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 
 /*
- * Private routines used by NtlmGenerator module. 
+ * Private routines used by NtlmGenerator module.
  */
 #include "ntlmBlobPriv.h"
 #include <CoreServices/CoreServices.h>
@@ -65,9 +65,9 @@
 
 #if		DEBUG_FIXED_CHALLENGE
 /* Fixed 64-bit timestamp for sourceforge test vectors */
-static unsigned char dbgStamp[] = 
-{ 
-	0x00, 0x90, 0xd3, 0x36, 0xb7, 0x34, 0xc3, 0x01 
+static unsigned char dbgStamp[] =
+{
+	0x00, 0x90, 0xd3, 0x36, 0xb7, 0x34, 0xc3, 0x01
 };
 #endif  /* DEBUG_FIXED_CHALLENGE */
 
@@ -123,8 +123,8 @@ void appendUint16(
 	CFDataAppendBytes(buf, cb, 2);
 }
 
-/* 
- * Write a security buffer, providing the index into the CFData at which 
+/*
+ * Write a security buffer, providing the index into the CFData at which
  * this security buffer's offset is located. Just before the actual data is written,
  * go back and update the offset with the start of that data using secBufOffset().
  */
@@ -183,7 +183,7 @@ OSStatus ntlmParseSecBuffer(
 #pragma mark --- CFString converters ---
 
 /*
- * Convert CFString to little-endian unicode. 
+ * Convert CFString to little-endian unicode.
  */
 void ntlmStringToLE(
 	CFStringRef		pwd,
@@ -193,7 +193,7 @@ void ntlmStringToLE(
 	CFIndex len = CFStringGetLength(pwd);
 	unsigned char *data = (unsigned char *)malloc(len * 2);
 	unsigned char *cp = data;
-	
+
 	for(CFIndex dex=0; dex<len; dex++) {
 		UniChar uc = CFStringGetCharacterAtIndex(pwd, dex);
 		*cp++ = uc & 0xff;
@@ -205,8 +205,8 @@ void ntlmStringToLE(
 
 /*
  * Convert a CFStringRef into a mallocd array of chars suitable for the specified
- * encoding. This might return an error if the string can't be converted 
- * appropriately. 
+ * encoding. This might return an error if the string can't be converted
+ * appropriately.
  */
 OSStatus ntlmStringFlatten(
 	CFStringRef str,
@@ -231,7 +231,7 @@ OSStatus ntlmStringFlatten(
 			*flatLen = strLen;
 			return noErr;
 		}
-		
+
 		/*
 		 * Well that didn't work. Try UTF8 - I don't know how a MS would behave if
 		 * this portion of auth (only used for the LM response) didn't work.
@@ -301,12 +301,12 @@ OSStatus ntlmHostName(
 		return noErr;
 	}
 }
-	
-/* 
- * Append 64-bit little-endiam timestamp to a CFData. Time is relative to 
- * January 1 1601, in tenths of a microsecond. 
+
+/*
+ * Append 64-bit little-endiam timestamp to a CFData. Time is relative to
+ * January 1 1601, in tenths of a microsecond.
  */
-static const CFGregorianDate ntlmTimeBasis = 
+static const CFGregorianDate ntlmTimeBasis =
 {
 	1601,   // year
 	1,		// month
@@ -325,20 +325,20 @@ void ntlmAppendTimestamp(
 	#else
 
 	assert(CFGregorianDateIsValid(ntlmTimeBasis, kCFGregorianAllUnits));
-										
+
 	/* NULL OK for CFTimeZoneRef? */
 	CFAbsoluteTime basisTime = CFGregorianDateGetAbsoluteTime(ntlmTimeBasis, NULL);
 	CFAbsoluteTime nowTime   = CFAbsoluteTimeGetCurrent();
-	
+
 	/* elapsed := time in seconds since basis */
 	CFTimeInterval elapsed = nowTime - basisTime;
 	/* now in tenths of microseconds */
 	elapsed *= 10000000.0;
-	
+
 	uint32 lowWord = (uint32)elapsed;
 	elapsed /=  0x100000000ULL;
 	uint32 highWord = (uint32)elapsed;
-	
+
 	/* append this in little endian format */
 	appendUint32(ntlmV2Blob, lowWord);
 	appendUint32(ntlmV2Blob, highWord);
@@ -372,8 +372,8 @@ void md5Hash(
 }
 
 /*
- * Given 7 bytes, create 8-byte DES key. Our implementation ignores the 
- * parity bit (lsb), which simplifies this somewhat. 
+ * Given 7 bytes, create 8-byte DES key. Our implementation ignores the
+ * parity bit (lsb), which simplifies this somewhat.
  */
 void ntlmMakeDesKey(
 	const unsigned char *inKey,			// 7 bytes
@@ -410,7 +410,7 @@ static void ntlmSetupKey(
 
 /*
  * single block DES encrypt.
- * This would really benefit from a DES implementation in CommonCrypto. 
+ * This would really benefit from a DES implementation in CommonCrypto.
  */
 OSStatus ntlmDesCrypt(
 	CSSM_CSP_HANDLE		cspHand,
@@ -421,10 +421,10 @@ OSStatus ntlmDesCrypt(
 	CSSM_CC_HANDLE ccHand;
 	CSSM_RETURN crtn;
 	CSSM_KEY ckey;
-	
-	ntlmSetupKey(CSSM_ALGID_DES, key, DES_KEY_SIZE, 
+
+	ntlmSetupKey(CSSM_ALGID_DES, key, DES_KEY_SIZE,
 		DES_RAW_KEY_SIZE * 8, &ckey);
-	
+
 	crtn = CSSM_CSP_CreateSymmetricContext(cspHand,
 		CSSM_ALGID_DES,
 		CSSM_ALGMODE_ECB,
@@ -440,11 +440,11 @@ OSStatus ntlmDesCrypt(
 		#endif
 		return crtn;
 	}
-	
+
 	CSSM_DATA ptext = {8, (uint8 *)inData};
 	CSSM_DATA ctext = {9, (uint8 *)outData};
 	uint32 bytesEncrypted;
-	
+
 	crtn = CSSM_EncryptDataInit(ccHand);
 	if(crtn) {
 		#ifndef NDEBUG
@@ -471,7 +471,7 @@ errOut:
  */
 OSStatus ntlmHmacMD5(
 	CSSM_CSP_HANDLE		cspHand,
-	const unsigned char *key,	
+	const unsigned char *key,
 	unsigned			keyLen,
 	const unsigned char *inData,
 	unsigned			inDataLen,
@@ -481,8 +481,8 @@ OSStatus ntlmHmacMD5(
 	CSSM_RETURN crtn;
 	CSSM_KEY ckey;
 	CSSM_DATA cdata = { inDataLen, (uint8 *)inData };
-	
-	ntlmSetupKey(CSSM_ALGID_MD5HMAC, key, keyLen, 
+
+	ntlmSetupKey(CSSM_ALGID_MD5HMAC, key, keyLen,
 		keyLen * 8, &ckey);
 	crtn = CSSM_CSP_CreateMacContext(cspHand,
 		CSSM_ALGID_MD5HMAC,	&ckey, &ccHand);
@@ -506,7 +506,7 @@ OSStatus ntlmHmacMD5(
 		#endif
 		goto errOut;
 	}
-	
+
 	/* provide pre-allocated output buffer */
 	cdata.Data = (uint8 *)mac;
 	cdata.Length = NTLM_DIGEST_LENGTH;
@@ -524,15 +524,15 @@ errOut:
 #pragma mark --- LM and NTLM password and digest munging ---
 
 /*
- * Calculate LM-style password hash. This really only works if the password 
+ * Calculate LM-style password hash. This really only works if the password
  * is convertible to ASCII (that is, it will indeed return an error if that
- * is not true). 
+ * is not true).
  *
  * This is the most gawdawful constant I've ever seen in security-related code.
  */
 static const unsigned char lmHashPlaintext[] = {'K', 'G', 'S', '!', '@', '#', '$', '%'};
 
-OSStatus lmPasswordHash(	
+OSStatus lmPasswordHash(
 	CSSM_CSP_HANDLE cspHand,
 	CFStringRef		pwd,
 	unsigned char   *digest)		// caller-supplied, NTLM_DIGEST_LENGTH
@@ -546,7 +546,7 @@ OSStatus lmPasswordHash(
 		dprintf("lmPasswordHash: ASCII password conversion failed\n");
 		return ortn;
 	}
-	
+
 	/* truncate/pad to 14 bytes and convert to upper case */
 	unsigned char pwdFix[NTLM_LM_PASSWORD_LEN];
 	unsigned toMove = NTLM_LM_PASSWORD_LEN;
@@ -558,12 +558,12 @@ OSStatus lmPasswordHash(
 	for(unsigned dex=0; dex<NTLM_LM_PASSWORD_LEN; dex++) {
 		pwdFix[dex] = toupper(pwdFix[dex]);
 	}
-	
+
 	/* two DES keys - raw material 7 bytes, munge to 8 bytes */
 	unsigned char desKey1[DES_KEY_SIZE], desKey2[DES_KEY_SIZE];
 	ntlmMakeDesKey(pwdFix, desKey1);
 	ntlmMakeDesKey(pwdFix + DES_RAW_KEY_SIZE, desKey2);
-	
+
 	/* use each of those keys to encrypt the magic string */
 	ortn = ntlmDesCrypt(cspHand, desKey1, lmHashPlaintext, digest);
 	if(ortn == noErr) {
@@ -571,7 +571,7 @@ OSStatus lmPasswordHash(
 	}
 	return ortn;
 }
-	
+
 /*
  * Calculate NTLM password hash (MD4 on a unicode password).
  */
@@ -589,22 +589,22 @@ void ntlmPasswordHash(
 	free(data);
 }
 
-/* 
- * NTLM response: DES encrypt the challenge (or session hash) with three 
- * different keys derived from the password hash. Result is concatenation 
- * of three DES encrypts. 
+/*
+ * NTLM response: DES encrypt the challenge (or session hash) with three
+ * different keys derived from the password hash. Result is concatenation
+ * of three DES encrypts.
  */
 #define ALL_KEYS_LENGTH (3 * DES_RAW_KEY_SIZE)
 OSStatus ntlmResponse(
 	CSSM_CSP_HANDLE		cspHand,
 	const unsigned char *digest,		// NTLM_DIGEST_LENGTH bytes
-	const unsigned char *ptext,			// challenge or session hash 
+	const unsigned char *ptext,			// challenge or session hash
 	unsigned char		*ntlmResp)		// caller-supplied NTLM_LM_RESPONSE_LEN
 {
 	unsigned char allKeys[ALL_KEYS_LENGTH];
 	unsigned char key1[DES_KEY_SIZE], key2[DES_KEY_SIZE], key3[DES_KEY_SIZE];
 	OSStatus ortn;
-	
+
 	memmove(allKeys, digest, NTLM_DIGEST_LENGTH);
 	memset(allKeys + NTLM_DIGEST_LENGTH, 0, ALL_KEYS_LENGTH - NTLM_DIGEST_LENGTH);
 	ntlmMakeDesKey(allKeys, key1);

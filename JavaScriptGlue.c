@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /*
@@ -90,7 +90,7 @@ void
 JSRelease(JSTypeRef ref) {
 
     GET_DYNAMIC_SYMBOL(JSRelease, void, (JSTypeRef), returns);
-    
+
     return JavaScriptCallBacks->JSRelease_proc(ref);
 }
 
@@ -98,7 +98,7 @@ void
 JSLockInterpreter(void) {
 
     GET_DYNAMIC_SYMBOL(JSLockInterpreter, void, (void), returns);
-    
+
     JavaScriptCallBacks->JSLockInterpreter_proc();
 }
 
@@ -106,7 +106,7 @@ void
 JSUnlockInterpreter(void) {
 
     GET_DYNAMIC_SYMBOL(JSUnlockInterpreter, void, (void), returns);
-    
+
     JavaScriptCallBacks->JSUnlockInterpreter_proc();
 }
 
@@ -114,14 +114,14 @@ JSObjectRef
 JSObjectCallFunction(JSObjectRef ref, JSObjectRef thisObj, CFArrayRef args) {
 
     GET_DYNAMIC_SYMBOL(JSObjectCallFunction, JSObjectRef, (JSObjectRef, JSObjectRef, CFArrayRef), returns_ref);
-    
+
     return JavaScriptCallBacks->JSObjectCallFunction_proc(ref, thisObj, args);
 }
 
-CFMutableArrayRef 
+CFMutableArrayRef
 JSCreateJSArrayFromCFArray(CFArrayRef array) {
     GET_DYNAMIC_SYMBOL(JSCreateJSArrayFromCFArray, CFMutableArrayRef, (CFArrayRef), returns_ref);
-    
+
     return JavaScriptCallBacks->JSCreateJSArrayFromCFArray_proc(array);
 }
 
@@ -131,7 +131,7 @@ JSRunRef
 JSRunCreate(CFStringRef jsSource, JSFlags inFlags) {
 
     GET_DYNAMIC_SYMBOL(JSRunCreate, JSRunRef, (CFStringRef, JSFlags), returns_ref);
-    
+
     return JavaScriptCallBacks->JSRunCreate_proc(jsSource, inFlags);
 }
 
@@ -140,7 +140,7 @@ JSObjectRef
 JSRunCopyGlobalObject(JSRunRef ref) {
 
     GET_DYNAMIC_SYMBOL(JSRunCopyGlobalObject, JSObjectRef, (JSRunRef), returns_ref);
-    
+
     return JavaScriptCallBacks->JSRunCopyGlobalObject_proc(ref);
 }
 
@@ -149,7 +149,7 @@ JSObjectRef
 JSRunEvaluate(JSRunRef ref) {
 
     GET_DYNAMIC_SYMBOL(JSRunEvaluate, JSObjectRef, (JSRunRef), returns_ref);
-    
+
     return JavaScriptCallBacks->JSRunEvaluate_proc(ref);
 }
 
@@ -158,7 +158,7 @@ bool
 JSRunCheckSyntax(JSRunRef ref) {
 
     GET_DYNAMIC_SYMBOL(JSRunCheckSyntax, bool, (JSRunRef), returns_bool);
-    
+
     return JavaScriptCallBacks->JSRunCheckSyntax_proc(ref);
 }
 
@@ -167,7 +167,7 @@ JSObjectRef
 JSObjectCreate(void* data, JSObjectCallBacksPtr callBacks) {
 
     GET_DYNAMIC_SYMBOL(JSObjectCreate, JSObjectRef, (void*, JSObjectCallBacksPtr), returns_ref);
-    
+
     return JavaScriptCallBacks->JSObjectCreate_proc(data, callBacks);
 }
 
@@ -176,7 +176,7 @@ void
 JSObjectSetProperty(JSObjectRef ref, CFStringRef propertyName, JSObjectRef value) {
 
     GET_DYNAMIC_SYMBOL(JSObjectSetProperty, void, (JSObjectRef, CFStringRef, JSObjectRef), returns);
-    
+
     return JavaScriptCallBacks->JSObjectSetProperty_proc(ref, propertyName, value);
 }
 
@@ -185,7 +185,7 @@ JSObjectRef
 JSObjectCreateWithCFType(CFTypeRef inRef) {
 
     GET_DYNAMIC_SYMBOL(JSObjectCreateWithCFType, JSObjectRef, (CFTypeRef), returns_ref);
-    
+
     return JavaScriptCallBacks->JSObjectCreateWithCFType_proc(inRef);
 }
 
@@ -194,7 +194,7 @@ CFTypeRef
 JSObjectCopyCFValue(JSObjectRef ref) {
 
     GET_DYNAMIC_SYMBOL(JSObjectCopyCFValue, CFTypeRef, (JSObjectRef), returns_ref);
-    
+
     return JavaScriptCallBacks->JSObjectCopyCFValue_proc(ref);
 }
 

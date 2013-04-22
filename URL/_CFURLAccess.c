@@ -2,14 +2,14 @@
  * Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
  *
  * @APPLE_LICENSE_HEADER_START@
- * 
+ *
  * This file contains Original Code and/or Modifications of Original Code
  * as defined in and that are subject to the Apple Public Source License
  * Version 2.0 (the 'License'). You may not use this file except in
  * compliance with the License. Please obtain a copy of the License at
  * http://www.opensource.apple.com/apsl/ and read it before using this
  * file.
- * 
+ *
  * The Original Code and all software distributed under the License are
  * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  * Please see the License for the specific language governing rights and
  * limitations under the License.
- * 
+ *
  * @APPLE_LICENSE_HEADER_END@
  */
 /* This was part of CoreFoundation; CF now dynamically loads us and calls through to us for any non-file scheme.  If/when CFNetwork has its own URL->stream/data/whatever APIs, this should be re-implemented in terms of that.   Note that, for the time being, CoreFoundation still exports the property names */
@@ -262,129 +262,129 @@ static Boolean _CFHTTPURLDestroyResource(CFURLRef url, SInt32 *errorCode) {
 /* FTP routines       */
 /**********************/
 static void _ApplyWriteStreamProperties(CFTypeRef key, CFTypeRef value, CFWriteStreamRef stream) {
-	
+
 	if (CFGetTypeID(key) == CFStringGetTypeID())
 		CFWriteStreamSetProperty((CFWriteStreamRef)stream, (CFStringRef)key, value);
 }
 
 static Boolean _CFFTPURLCreateDataAndPropertiesFromResource(CFAllocatorRef alloc, CFURLRef url, CFDataRef *fetchedData, CFArrayRef desiredProperties, CFDictionaryRef *fetchedProperties, SInt32 *errorCode) {
-	
+
 	SInt32 extra;
 	CFStreamError error;
 	CFReadStreamRef readStream;
-	
+
 	if (!errorCode) errorCode = &extra;
-	
+
 	if (!fetchedData) {
 		*errorCode = kCFURLImproperArgumentsError;
 		return FALSE;
 	}
-	
+
 	*fetchedData = (CFDataRef)CFDataCreateMutable(alloc, 0);
 	readStream = CFReadStreamCreateWithFTPURL(alloc, url);
-	
+
 	// Don't use persistence and this request won't get stuck behind another.
-	CFReadStreamSetProperty(readStream, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse); 
-	
+	CFReadStreamSetProperty(readStream, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse);
+
 	if (CFReadStreamOpen(readStream)) {
-		
+
 		CFIndex read;
-		
+
 		do {
 			UInt8 buffer[32768];
 			read = CFReadStreamRead(readStream, buffer, sizeof(buffer));
-			
+
 			if (read <= 0)
 				break;
-			
+
 			CFDataAppendBytes(*((CFMutableDataRef*)fetchedData), buffer, read);
-				
+
 		} while (1);
-		
-		CFReadStreamClose(readStream);			
+
+		CFReadStreamClose(readStream);
 	}
-	
+
 	error = CFReadStreamGetError(readStream);
 	*errorCode = error.error;
-	
+
 	CFRelease(readStream);
-	
+
     return (*errorCode == 0) ? TRUE : FALSE;
 }
 
 static Boolean _CFFTPURLWriteDataAndPropertiesToResource(CFURLRef url, CFDataRef data, CFDictionaryRef propertyDict, SInt32 *errorCode) {
-	
+
 	SInt32 extra;
 	CFStreamError error;
 	CFWriteStreamRef writeStream;
 	const UInt8* buffer;
 	CFIndex left;
-	
+
 	if (!errorCode) errorCode = &extra;
-	
+
 	if (!data) {
 		*errorCode = kCFURLImproperArgumentsError;
 		return FALSE;
 	}
-	
+
 	buffer = CFDataGetBytePtr(data);
 	left = CFDataGetLength(data);
-	
+
 	writeStream = CFWriteStreamCreateWithFTPURL(CFGetAllocator(url), url);
 	if (propertyDict)
 		CFDictionaryApplyFunction(propertyDict, (CFDictionaryApplierFunction)_ApplyWriteStreamProperties, writeStream);
-	
+
 	// Don't use persistence and this request won't get stuck behind another.
-	CFWriteStreamSetProperty(writeStream, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse); 
-	
+	CFWriteStreamSetProperty(writeStream, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse);
+
 	if (CFWriteStreamOpen(writeStream)) {
-		
+
 		while (left) {
-			
+
 			CFIndex written = CFWriteStreamWrite(writeStream, buffer, left);
-		
+
 			if (written <= 0)
 				break;
-			
+
 			buffer += written;
 			left -= written;
 		}
-		
+
 		CFWriteStreamClose(writeStream);
 	}
-	
+
 	error = CFWriteStreamGetError(writeStream);
 	*errorCode = error.error;
-	
+
 	CFRelease(writeStream);
-	
+
     return (*errorCode == 0) ? TRUE : FALSE;
 }
 
 static Boolean _CFFTPURLDestroyResource(CFURLRef url, SInt32 *errorCode) {
-	
+
 	SInt32 extra;
 	CFStreamError error;
 	CFWriteStreamRef writeStream = CFWriteStreamCreateWithFTPURL(CFGetAllocator(url), url);
-	
+
 	if (!errorCode) errorCode = &extra;
-	
+
 	// Don't use persistence and this request won't get stuck behind another.
-	CFWriteStreamSetProperty(writeStream, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse); 
-	
+	CFWriteStreamSetProperty(writeStream, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse);
+
 	// Use magic property to indicate to remove the resource.
 	CFWriteStreamSetProperty(writeStream, _kCFStreamPropertyFTPRemoveResource, kCFBooleanTrue);
-	
+
 	if (CFWriteStreamOpen(writeStream)) {
 		CFWriteStreamWrite(writeStream, "a", 1);
 		CFWriteStreamClose(writeStream);
 	}
-	
+
 	error = CFWriteStreamGetError(writeStream);
 	*errorCode = error.error;
-	
+
 	CFRelease(writeStream);
-	
+
     return (*errorCode == 0) ? TRUE : FALSE;
 }
 
@@ -437,7 +437,7 @@ Boolean _CFURLWriteDataAndPropertiesToResource(CFURLRef url, CFDataRef data, CFD
         if (errorCode) *errorCode = kCFURLImproperArgumentsError;
         return FALSE;
     }
-    
+
     if (CFStringCompare(scheme, _kCFURLAccessHTTPScheme, 0) == kCFCompareEqualTo || CFStringCompare(scheme, _kCFURLAccessHTTPSScheme, 0) == kCFCompareEqualTo) {
         result = _CFHTTPURLWriteDataAndPropertiesToResource(url, data, propertyDict, errorCode);
     } else if (CFStringCompare(scheme, _kCFURLAccessFTPScheme, 0) == kCFCompareEqualTo) {
@@ -458,7 +458,7 @@ Boolean _CFURLDestroyResource(CFURLRef url, SInt32 *errorCode) {
         if (errorCode) *errorCode = kCFURLImproperArgumentsError;
         return FALSE;
     }
-    
+
     if (CFStringCompare(scheme, _kCFURLAccessHTTPScheme, 0) == kCFCompareEqualTo || CFStringCompare(scheme, _kCFURLAccessHTTPSScheme, 0) == kCFCompareEqualTo) {
         result = _CFHTTPURLDestroyResource(url, errorCode);
     } else if (CFStringCompare(scheme, _kCFURLAccessFTPScheme, 0) == kCFCompareEqualTo) {
