@@ -443,7 +443,7 @@ OSStatus ntlmDesCrypt(
 
 	CSSM_DATA ptext = {8, (uint8 *)inData};
 	CSSM_DATA ctext = {9, (uint8 *)outData};
-	uint32 bytesEncrypted;
+	CSSM_SIZE bytesEncrypted;
 
 	crtn = CSSM_EncryptDataInit(ccHand);
 	if(crtn) {
