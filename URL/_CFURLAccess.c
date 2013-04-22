@@ -376,7 +376,7 @@ static Boolean _CFFTPURLDestroyResource(CFURLRef url, SInt32 *errorCode) {
 	CFWriteStreamSetProperty(writeStream, _kCFStreamPropertyFTPRemoveResource, kCFBooleanTrue);
 
 	if (CFWriteStreamOpen(writeStream)) {
-		CFWriteStreamWrite(writeStream, "a", 1);
+		CFWriteStreamWrite(writeStream, (const unsigned char *)"a", 1);
 		CFWriteStreamClose(writeStream);
 	}
 
