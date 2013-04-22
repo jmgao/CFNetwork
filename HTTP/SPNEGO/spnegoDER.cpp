@@ -56,7 +56,7 @@
 
 #include "spnegoDER.h"
 #include <Security/cssmtype.h>
-#include <Security/asn1Templates.h>
+#include <Security/SecAsn1Templates.h>
 #include <stddef.h>
 #include "spnegoBlob.h"
 

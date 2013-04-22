@@ -47,7 +47,7 @@
 #ifndef	_SPNEGO_DER_H_
 #define _SPNEGO_DER_H_
 
-#include <Security/secasn1t.h>
+#include <Security/SecASN1Types.h>
 #include <Security/cssmtype.h>
 
 #ifdef __cplusplus
