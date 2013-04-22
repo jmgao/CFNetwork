@@ -185,7 +185,7 @@ static void _RegisterReply(DNSServiceRef sdRef, DNSServiceFlags flags, DNSServic
 						   const char* name, const char* regtype, const char* domain, void* context);
 static void _ResolveReply(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex,
 						  DNSServiceErrorType errorCode, const char* fullname, const char* hosttarget,
-						  uint16_t port, uint16_t txtLen, const char* txtRecord, void* context);
+						  uint16_t port, uint16_t txtLen, const unsigned char* txtRecord, void* context);
 static void _SocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef address, const void *data, void *info);
 static void _AQuerySocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef address, const void *data, void *info);
 static void _AAAAQuerySocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef address, const void *data, void *info);
@@ -989,7 +989,7 @@ _RegisterReply(DNSServiceRef sdRef, DNSServiceFlags flags, DNSServiceErrorType e
 /* static */ void
 _ResolveReply(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex,
 			  DNSServiceErrorType errorCode, const char* fullname, const char* hosttarget,
-			  uint16_t port, uint16_t txtLen, const char* txtRecord, void* context)
+			  uint16_t port, uint16_t txtLen, const unsigned char* txtRecord, void* context)
 {
 	__CFNetService* service = (__CFNetService*)context;
 	CFNetServiceClientCallBack cb = NULL;
