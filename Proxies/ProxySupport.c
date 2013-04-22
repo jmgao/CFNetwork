@@ -33,6 +33,7 @@
 
 #include <CFNetwork/CFNetworkPriv.h>
 #include "CFNetworkInternal.h"
+#include <CoreFoundation/CFStreamAbstract.h>
 #include <CoreFoundation/CFStreamPriv.h>
 
 #ifndef __WIN32__
