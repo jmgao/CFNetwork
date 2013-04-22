@@ -71,7 +71,7 @@
 extern "C" {
 #endif
 
-#pragma options align=mac68k
+#pragma pack(2)
 
 #if PRAGMA_ENUM_ALWAYSINT
     #pragma enumsalwaysint on
