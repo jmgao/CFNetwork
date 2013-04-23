@@ -366,7 +366,8 @@ OSStatus NtlmGeneratorCreate(
 		return memFullErr;
 	}
 	gen->mWhich = which;
-	gen->mCspHand = cuCspStartup(CSSM_TRUE);
+	assert(false);
+	//gen->mCspHand = cuCspStartup(CSSM_TRUE);
 	if(gen->mCspHand == 0) {
 		return internalComponentErr;
 	}
@@ -383,7 +384,8 @@ void NtlmGeneratorRelease(
 		return;
 	}
 	if(ntlmGen->mCspHand) {
-		cuCspDetachUnload(ntlmGen->mCspHand, CSSM_TRUE);
+		assert(false);
+		//cuCspDetachUnload(ntlmGen->mCspHand, CSSM_TRUE);
 	}
 	free(ntlmGen);
 }
