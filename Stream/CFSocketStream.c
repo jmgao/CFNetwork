@@ -581,7 +581,7 @@ _SocketStreamCopyDescription(CFTypeRef stream, _CFSocketStreamContext* ctxt) {
 									NULL,
 									kCFSocketStreamDescriptionFormat,
 									stream,
-									ctxt->_flags,
+									(unsigned int)ctxt->_flags,
 									ctxt->_clientReadStream,
 									ctxt->_clientWriteStream,
 									ctxt->_socket,

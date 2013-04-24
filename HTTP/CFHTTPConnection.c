@@ -35,7 +35,7 @@ extern void _CFSocketStreamCreatePair(CFAllocatorRef alloc, CFStringRef host, UI
 #ifdef __CONSTANT_CFSTRINGS__
 #define _kCFStreamSocketCreatedCallBack			CFSTR("_kCFStreamSocketCreatedCallBack")
 #define _kCFHTTPConnectionHEADMethod			CFSTR("HEAD")
-#define _kCFHTTPConnectionDescribeFormat		CFSTR("<HTTP stream context 0x%x>{url = %@, state = %d, conn=0x%x}")
+#define _kCFHTTPConnectionDescribeFormat		CFSTR("<HTTP stream context 0x%p>{url = %@, state = %d, conn=0x%p}")
 #define _kCFHTTPConnectionPrivateRunLoopMode	CFSTR("_kCFHTTPConnectionPrivateRunLoopMode")
 #define _kCFHTTPSScheme							CFSTR("https")
 #define _kCFNTLMMethod							CFSTR("NTLM")
@@ -45,7 +45,7 @@ extern void _CFSocketStreamCreatePair(CFAllocatorRef alloc, CFStringRef host, UI
 #else
 static CONST_STRING_DECL(_kCFStreamSocketCreatedCallBack, "_kCFStreamSocketCreatedCallBack")
 static CONST_STRING_DECL(_kCFHTTPConnectionHEADMethod, "HEAD")
-static CONST_STRING_DECL(_kCFHTTPConnectionDescribeFormat, "<HTTP stream context 0x%x>{url = %@, state = %d, conn=0x%x}")
+static CONST_STRING_DECL(_kCFHTTPConnectionDescribeFormat, "<HTTP stream context 0x%p>{url = %@, state = %d, conn=0x%p}")
 static CONST_STRING_DECL(_kCFHTTPConnectionPrivateRunLoopMode, "_kCFHTTPConnectionPrivateRunLoopMode")
 static CONST_STRING_DECL(_kCFHTTPSScheme, "https")
 static CONST_STRING_DECL(_kCFNTLMMethod, "NTLM")
@@ -452,7 +452,7 @@ static Boolean persistentIsOK(_CFHTTPStreamInfo *streamInfo, CFReadStreamRef str
     Boolean persistentOK = TRUE;
 
     if (!stream) {
-        CFLog(0, CFSTR("Internal consistency check error for http request 0x%x"), streamInfo);
+        CFLog(0, CFSTR("Internal consistency check error for http request 0x%p"), streamInfo);
         return TRUE;
     }
 
@@ -515,7 +515,7 @@ static void haveBeenOrphaned(_CFHTTPStreamInfo *streamInfo, CFStreamError *err, 
 static void httpConnectionStateChanged(void *request, int newState, CFStreamError *err, _CFNetConnectionRef conn, const void *info) {
     _CFHTTPStreamInfo *streamInfo = (_CFHTTPStreamInfo *)request;
 //    if (_CFHTTPStreamInfoGetState(streamInfo) != newState-1) {
-//        fprintf(stderr, "streamInfo %x going from state %d to %d\n", (unsigned)request, _CFHTTPStreamInfoGetState(streamInfo), newState);
+//        fprintf(stderr, "streamInfo %p going from state %d to %d\n", request, _CFHTTPStreamInfoGetState(streamInfo), newState);
 //    }
     __CFBitfieldSetValue(streamInfo->flags, MAX_STATE_BIT, MIN_STATE_BIT, newState);
 
@@ -604,7 +604,7 @@ static void httpConnectionStateChanged(void *request, int newState, CFStreamErro
         break;
     }
     default:
-        CFLog(0, CFSTR("Encountered unexpected state %d for request 0x%x"), newState, streamInfo);
+        CFLog(0, CFSTR("Encountered unexpected state %d for request 0x%p"), newState, streamInfo);
     }
 }
 
@@ -1016,7 +1016,7 @@ static void httpStreamFinalize(CFReadStreamRef stream, void *info) {
 static CFStringRef httpStreamCopyDescription(CFReadStreamRef stream, void *info) {
     _CFHTTPStreamInfo *streamInfo = (_CFHTTPStreamInfo *)info;
     CFURLRef url = CFHTTPMessageCopyRequestURL(streamInfo->request);
-    CFStringRef str = CFStringCreateWithFormat(stream ? CFGetAllocator(stream) : NULL, NULL, _kCFHTTPConnectionDescribeFormat, (unsigned)streamInfo, url, _CFHTTPStreamInfoGetState(streamInfo), (unsigned)streamInfo->conn);
+    CFStringRef str = CFStringCreateWithFormat(stream ? CFGetAllocator(stream) : NULL, NULL, _kCFHTTPConnectionDescribeFormat, streamInfo, url, _CFHTTPStreamInfoGetState(streamInfo), streamInfo->conn);
     CFRelease(url);
     return str;
 }

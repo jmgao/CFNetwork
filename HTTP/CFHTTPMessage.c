@@ -159,7 +159,7 @@ static const CFStringRef kHTTPMessageHeaderMap2[] = {
 #define kHTTPMessageNumItems (sizeof(kHTTPMessageHeaderMap) / sizeof(kHTTPMessageHeaderMap[0]))
 
 #ifdef __CONSTANT_CFSTRINGS__
-#define _kCFHTTPMessageDescribeFormat		CFSTR("<CFHTTPMessage 0x%x>{url = %@; %@ = %@}")
+#define _kCFHTTPMessageDescribeFormat		CFSTR("<CFHTTPMessage 0x%p>{url = %@; %@ = %@}")
 #define _kCFHTTPMessageDescribeRequest		CFSTR("request")
 #define _kCFHTTPMessageDescribeStatus		CFSTR("status")
 #define _kCFHTTPMessageGETMethod			CFSTR("GET")
@@ -168,7 +168,7 @@ static const CFStringRef kHTTPMessageHeaderMap2[] = {
 #define _kCFHTTPMessageEmptyString			CFSTR("")
 #define _kCFHTTPMessageAppendHeaderFormat	CFSTR("%@, %@")
 #else
-static CONST_STRING_DECL(_kCFHTTPMessageDescribeFormat, "<CFHTTPMessage 0x%x>{url = %@; %@ = %@}")
+static CONST_STRING_DECL(_kCFHTTPMessageDescribeFormat, "<CFHTTPMessage 0x%p>{url = %@; %@ = %@}")
 static CONST_STRING_DECL(_kCFHTTPMessageDescribeRequest, "request")
 static CONST_STRING_DECL(_kCFHTTPMessageDescribeStatus, "status")
 static CONST_STRING_DECL(_kCFHTTPMessageGETMethod, "GET")
@@ -763,7 +763,7 @@ Boolean CFHTTPMessageIsHeaderComplete(CFHTTPMessageRef message) {
 
 CFStringRef CFHTTPMessageCopyRequestMethod(CFHTTPMessageRef request) {
 //    __CFGenericValidateType(request, CFHTTPMessageGetTypeID());
-//    CFAssert2(((request->_flags & IS_RESPONSE) == 0), __kCFLogAssertion, "%s(): message 0x%x is an HTTP response, not a request", __PRETTY_FUNCTION__, request);
+//    CFAssert2(((request->_flags & IS_RESPONSE) == 0), __kCFLogAssertion, "%s(): message 0x%p is an HTTP response, not a request", __PRETTY_FUNCTION__, request);
 
     if (!request->_method) {
         CFRange rg;
@@ -783,7 +783,7 @@ CFStringRef CFHTTPMessageCopyRequestMethod(CFHTTPMessageRef request) {
 
 CFURLRef CFHTTPMessageCopyRequestURL(CFHTTPMessageRef request) {
 //    __CFGenericValidateType(request, CFHTTPMessageGetTypeID());
-//    CFAssert2(((request->_flags & IS_RESPONSE) == 0), __kCFLogAssertion, "%s(): message 0x%x is an HTTP response, not a request", __PRETTY_FUNCTION__, request);
+//    CFAssert2(((request->_flags & IS_RESPONSE) == 0), __kCFLogAssertion, "%s(): message 0x%p is an HTTP response, not a request", __PRETTY_FUNCTION__, request);
     CFRetain(request->_url);
     return request->_url;
 }
@@ -802,7 +802,7 @@ void _CFHTTPMessageSetResponseURL(CFHTTPMessageRef response, CFURLRef url) {
 // Assert if response is a request, not a response.  Return -1 if we haven't parsed a response code yet
 UInt32 CFHTTPMessageGetResponseStatusCode(CFHTTPMessageRef response) {
 //    __CFGenericValidateType(response, CFHTTPMessageGetTypeID());
-//    CFAssert2(((response->_flags & IS_RESPONSE) != 0), __kCFLogAssertion, "%s(): message 0x%x is an HTTP request, not a response", __PRETTY_FUNCTION__, response);
+//    CFAssert2(((response->_flags & IS_RESPONSE) != 0), __kCFLogAssertion, "%s(): message 0x%p is an HTTP request, not a response", __PRETTY_FUNCTION__, response);
 
     if (!response->_firstLine) {
         // Haven't paresd out the status line yet

@@ -103,14 +103,14 @@ CFHTTPMessageRef _CFHTTPMessageSendRequest(CFHTTPMessageRef request) {
 #define _kCFURLAccessPUTMethod				CFSTR("PUT")
 #define _kCFURLAccessDELETEMethod			CFSTR("DELETE")
 #define _kCFURLAccessContentLengthHeader	CFSTR("Content-Length")
-#define _kCFURLAccessContentLengthFormat	CFSTR("%d")
+#define _kCFURLAccessContentLengthFormat	CFSTR("%zd")
 #else
 static CONST_STRING_DECL(_kCFURLAccessGETMethod, "GET")
 static CONST_STRING_DECL(_kCFURLAccessHEADMethod, "HEAD")
 static CONST_STRING_DECL(_kCFURLAccessPUTMethod, "PUT")
 static CONST_STRING_DECL(_kCFURLAccessDELETEMethod, "DELETE")
 static CONST_STRING_DECL(_kCFURLAccessContentLengthHeader, "Content-Length")
-static CONST_STRING_DECL(_kCFURLAccessContentLengthFormat, "%d")
+static CONST_STRING_DECL(_kCFURLAccessContentLengthFormat, "%zd")
 #endif	/* __CONSTANT_CFSTRINGS__ */
 
 static Boolean _CFHTTPURLCreateDataAndPropertiesFromResource(CFAllocatorRef alloc, CFURLRef url, CFDataRef *fetchedData, CFArrayRef desiredProperties, CFDictionaryRef *fetchedProperties, SInt32 *errorCode) {

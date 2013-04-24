@@ -90,21 +90,21 @@
 #endif
 
 #ifdef __CONSTANT_CFSTRINGS__
-#define _kCFHTTPServerDescribeFormat			CFSTR("<HttpServer 0x%x>{server=%@, connections=%@, info=%@}")
-#define _kCFHTTPServerPtrFormat					CFSTR("<0x%x>")
+#define _kCFHTTPServerDescribeFormat			CFSTR("<HttpServer 0x%p>{server=%@, connections=%@, info=%@}")
+#define _kCFHTTPServerPtrFormat					CFSTR("<0x%p>")
 #define _kCFHTTPServerContentLengthHeader		CFSTR("Content-length")
-#define _kCFHTTPServerContentLengthFormat		CFSTR("%d")
-#define _kCFHTTPServerConnectionDescribeFormat	CFSTR("<_HttpConnection 0x%x>{server=0x%x, timer=%@, inStream=%@, outStream=%@, responses=%@, requests=%@, buffered=%@}")
+#define _kCFHTTPServerContentLengthFormat		CFSTR("%ld")
+#define _kCFHTTPServerConnectionDescribeFormat	CFSTR("<_HttpConnection 0x%p>{server=0x%p, timer=%@, inStream=%@, outStream=%@, responses=%@, requests=%@, buffered=%@}")
 #define _kCFHTTPServerTransferEncodingHeader	CFSTR("Transfer-Encoding")
 #define _kCFHTTPServerTransferEncodingChunked	CFSTR("chunked")
 #define _kCFHTTPServerConnectionHeader			CFSTR("Connection")
 #define _kCFHTTPServerConnectionClose			CFSTR("close")
 #else
-static CONST_STRING_DECL(_kCFHTTPServerDescribeFormat, "<HttpServer 0x%x>{server=%@, connections=%@, info=%@}")
-static CONST_STRING_DECL(_kCFHTTPServerPtrFormat, "<0x%x>")
+static CONST_STRING_DECL(_kCFHTTPServerDescribeFormat, "<HttpServer 0x%p>{server=%@, connections=%@, info=%@}")
+static CONST_STRING_DECL(_kCFHTTPServerPtrFormat, "<0x%p>")
 static CONST_STRING_DECL(_kCFHTTPServerContentLengthHeader, "Content-length")
-static CONST_STRING_DECL(_kCFHTTPServerContentLengthFormat, "%d")
-static CONST_STRING_DECL(_kCFHTTPServerConnectionDescribeFormat, "<_HttpConnection 0x%x>{server=0x%x, timer=%@, inStream=%@, outStream=%@, responses=%@, requests=%@, buffered=%@}")
+static CONST_STRING_DECL(_kCFHTTPServerContentLengthFormat, "%ld")
+static CONST_STRING_DECL(_kCFHTTPServerConnectionDescribeFormat, "<_HttpConnection 0x%p>{server=0x%p, timer=%@, inStream=%@, outStream=%@, responses=%@, requests=%@, buffered=%@}")
 static CONST_STRING_DECL(_kCFHTTPServerTransferEncodingHeader, "Transfer-Encoding")
 static CONST_STRING_DECL(_kCFHTTPServerTransferEncodingChunked, "chunked")
 static CONST_STRING_DECL(_kCFHTTPServerConnectionHeader, "Connection")
@@ -345,13 +345,13 @@ _HttpServerCopyDescription(_CFHTTPServerRef server) {
 	if (s->_ctxt.copyDescription)
 		info = s->_ctxt.copyDescription(s->_ctxt.info);
 	else
-		info = CFStringCreateWithFormat(alloc, NULL, _kCFHTTPServerPtrFormat, (UInt32)(s->_ctxt.info));
+		info = CFStringCreateWithFormat(alloc, NULL, _kCFHTTPServerPtrFormat, s->_ctxt.info);
 
 	// Create the debug string
     result = CFStringCreateWithFormat(alloc,
 									  NULL,
 									  _kCFHTTPServerDescribeFormat,
-									  (UInt32)s,
+									  s,
                                       serverDescription,
 									  s->_connections,
 									  info);
@@ -784,8 +784,8 @@ _HttpConnectionCopyDescription(HttpConnection* connection) {
     result = CFStringCreateWithFormat(connection->_alloc,
 									  NULL,
 									  _kCFHTTPServerConnectionDescribeFormat,
-									  (UInt32)connection,
-                                      (UInt32)connection->_server,
+									  connection,
+                                      connection->_server,
 									  connection->_timer,
 									  connection->_inStream,
                                       connection->_outStream,

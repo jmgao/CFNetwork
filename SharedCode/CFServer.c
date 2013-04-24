@@ -53,13 +53,13 @@
 
 #ifdef __CONSTANT_CFSTRINGS__
 #define _kCFServerNULL				CFSTR("0x0")
-#define _kCFServerPtrFormat			CFSTR("<0x%x>")
-#define _kCFServerDescribeFormat	CFSTR("<Server 0x%x>{sockets=[%@, %@], service=%@, info=%@}")
+#define _kCFServerPtrFormat			CFSTR("<0x%p>")
+#define _kCFServerDescribeFormat	CFSTR("<Server 0x%p>{sockets=[%@, %@], service=%@, info=%@}")
 #define _kCFServerEmptyString		CFSTR("")
 #else
 static CONST_STRING_DECL(_kCFServerNULL, "0x0")
-static CONST_STRING_DECL(_kCFServerPtrFormat, "<0x%x>")
-static CONST_STRING_DECL(_kCFServerDescribeFormat, "<Server 0x%x>{sockets=[%@, %@], service=%@, info=%@}")
+static CONST_STRING_DECL(_kCFServerPtrFormat, "<0x%p>")
+static CONST_STRING_DECL(_kCFServerDescribeFormat, "<Server 0x%p>{sockets=[%@, %@], service=%@, info=%@}")
 static CONST_STRING_DECL(_kCFServerEmptyString, "")
 #endif	/* __CONSTANT_CFSTRINGS__ */
 
@@ -273,13 +273,13 @@ _ServerCopyDescription(_CFServerRef server) {
 	if (s->_ctxt.copyDescription)
 		info = s->_ctxt.copyDescription(s->_ctxt.info);
 	else
-		info = CFStringCreateWithFormat(alloc, NULL, _kCFServerPtrFormat, (UInt32)(s->_ctxt.info));
+		info = CFStringCreateWithFormat(alloc, NULL, _kCFServerPtrFormat, s->_ctxt.info);
 
 	// Create the debug string
     result = CFStringCreateWithFormat(alloc,
 									  NULL,
 									  _kCFServerDescribeFormat,
-									  (UInt32)server,
+									  server,
 									  socket4,
 									  socket6,
 									  service,

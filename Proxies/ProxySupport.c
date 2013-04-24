@@ -574,9 +574,9 @@ static CFURLRef proxyURLForComponents(CFAllocatorRef alloc, CFStringRef scheme, 
     CFURLRef url;
 
     if (user) {
-        urlString = CFStringCreateWithFormat(alloc, NULL, _kProxySupportURLLongFormat, scheme, user, password, host, port);
+        urlString = CFStringCreateWithFormat(alloc, NULL, _kProxySupportURLLongFormat, scheme, user, password, host, (int)port);
     } else {
-        urlString = CFStringCreateWithFormat(alloc, NULL, _kProxySupportURLShortFormat, scheme, host, port);
+        urlString = CFStringCreateWithFormat(alloc, NULL, _kProxySupportURLShortFormat, scheme, host, (int)port);
     }
     url = CFURLCreateWithString(alloc, urlString, NULL);
     CFRelease(urlString);

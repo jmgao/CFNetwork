@@ -123,7 +123,7 @@ static void advanceToNextProxyFromProxyArray(CFMutableArrayRef proxyArray);
 #define _kCFHTTPStreamSOCKS5Scheme				CFSTR("socks5")
 #define _kCFHTTPStreamUserAgentHeader			CFSTR("User-Agent")
 #define _kCFHTTPStreamProxyAuthorizationHeader	CFSTR("Proxy-Authorization")
-#define _kCFHTTPStreamDescribeFormat			CFSTR("<HTTP request stream %p>{url = %@, state = %d, flags=%d}")
+#define _kCFHTTPStreamDescribeFormat			CFSTR("<HTTP request stream %p>{url = %@, state = %d, flags=%ld}")
 #define _kCFHTTPStreamContentLengthHeader		CFSTR("Content-Length")
 #define _kCFHTTPStreamContentLengthFormat		CFSTR("%d")
 #define _kCFHTTPStreamConnectionHeader			CFSTR("Connection")
@@ -148,7 +148,7 @@ static CONST_STRING_DECL(_kCFHTTPStreamSOCKS4Scheme, "socks4")
 static CONST_STRING_DECL(_kCFHTTPStreamSOCKS5Scheme, "socks5")
 static CONST_STRING_DECL(_kCFHTTPStreamUserAgentHeader, "User-Agent")
 static CONST_STRING_DECL(_kCFHTTPStreamProxyAuthorizationHeader, "Proxy-Authorization")
-static CONST_STRING_DECL(_kCFHTTPStreamDescribeFormat, "<HTTP request stream %p>{url = %@, state = %d, flags=%d}")
+static CONST_STRING_DECL(_kCFHTTPStreamDescribeFormat, "<HTTP request stream %p>{url = %@, state = %d, flags=%ld}")
 static CONST_STRING_DECL(_kCFHTTPStreamContentLengthHeader, "Content-Length")
 static CONST_STRING_DECL(_kCFHTTPStreamContentLengthFormat, "%d")
 static CONST_STRING_DECL(_kCFHTTPStreamConnectionHeader, "Connection")
@@ -540,7 +540,7 @@ static void *httpRequestCreate(CFReadStreamRef stream, void *info) {
     newReq->conn = NULL;
     newReq->stateChangeSource = NULL;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "Created request 0x%x\n", (int)newReq);
+    fprintf(stderr, "Created request 0x%p\n", newReq);
 #endif
     return newReq;
 }
@@ -550,7 +550,7 @@ _CFHTTPRequest *createZombieDouble1(CFAllocatorRef alloc, _CFHTTPRequest *orig, 
     _CFHTTPRequest *zombie;
     CFArrayRef origRLArray;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "substituteZombieDouble(0x%x, 0x%x, 0x%x) -", (int)alloc, (int)orig, (int)(conn));
+    fprintf(stderr, "substituteZombieDouble(0x%p, 0x%p, 0x%p) -", alloc, orig, conn);
 #endif
     zombie = CFAllocatorAllocate(alloc, sizeof(_CFHTTPRequest), 0);
     if (!zombie) return NULL;
@@ -601,7 +601,7 @@ _CFHTTPRequest *createZombieDouble1(CFAllocatorRef alloc, _CFHTTPRequest *orig, 
         }
     }
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, " returned zombie 0x%x\n", (int)zombie);
+    fprintf(stderr, " returned zombie 0x%p\n", zombie);
 #endif
     return zombie;
 }
@@ -661,7 +661,7 @@ static Boolean canShutdownConnection(_CFNetConnectionRef conn, _CFHTTPRequest *r
 static void dequeueFromConnection1(_CFHTTPRequest *req) {
     // Guard against re-entrancy; CFHTTPConnectionDequeue may end up re-entering us and we don't want to to attempt multiple dequeues from the same connection.  Hence the shuffle below with req->conn and conn.
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, " dequeueFromConnection(0x%x)\n", (int)req);
+    fprintf(stderr, " dequeueFromConnection(0x%p)\n", req);
 #endif
     if (req->conn) {
         _CFNetConnectionRef conn = req->conn;
@@ -722,7 +722,7 @@ static void httpRequestDestroy(CFAllocatorRef alloc, _CFHTTPRequest *req) {
 
 static void httpRequestFinalize(CFReadStreamRef stream, void *info) {
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, " httpRequestFinalize(0x%x, 0x%x)\n", (int)stream, (int)info);
+    fprintf(stderr, " httpRequestFinalize(0x%p, 0x%p)\n", stream, info);
 #endif
     httpRequestDestroy(CFGetAllocator(stream), (_CFHTTPRequest *)info);
 }
@@ -804,7 +804,7 @@ extern void cleanUpRequest(CFHTTPMessageRef req, int length, Boolean forPersiste
         if (port == -1) {
             CFHTTPMessageSetHeaderFieldValue(req, _kCFHTTPStreamHostHeader, host);
         } else {
-            CFStringRef hostStr = CFStringCreateWithFormat(CFGetAllocator(req), NULL, _kCFHTTPStreamHostFormat, host, port);
+            CFStringRef hostStr = CFStringCreateWithFormat(CFGetAllocator(req), NULL, _kCFHTTPStreamHostFormat, host, (int)port);
             if (hostStr) {
                 CFHTTPMessageSetHeaderFieldValue(req, _kCFHTTPStreamHostHeader, hostStr);
                 CFRelease(hostStr);
@@ -1038,7 +1038,7 @@ static void httpRequestStateChanged(void *request, int newState, CFStreamError *
     int oldState = _CFHTTPRequestGetState(req);
     Boolean haveBeenDealloced = FALSE;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestStateChanged(req = 0x%x, newState = %d, conn = 0x%x)\n", (int)req, newState, (int)conn);
+    fprintf(stderr, "httpRequestStateChanged(req = 0x%p, newState = %d, conn = 0x%p)\n", req, newState, conn);
 #endif
     _CFHTTPRequestSetState(req, newState);
 
@@ -1062,7 +1062,7 @@ static void httpRequestStateChanged(void *request, int newState, CFStreamError *
         break;
     }
     default:
-        CFLog(0, CFSTR("Encountered unexpected state %d for request 0x%x"), newState, req);
+        CFLog(0, CFSTR("Encountered unexpected state %d for request 0x%p"), newState, req);
     }
     if (!haveBeenDealloced && req->stateChangeSource) {
         CFRunLoopSourceSignal(req->stateChangeSource);
@@ -1182,7 +1182,7 @@ void httpTransmitRequest(void *request, _CFNetConnectionRef connection, const vo
     CFStreamError error;
     Boolean requestTransmitted;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpTransmitRequest(req = 0x%x, requestStream = 0x%x, conn = 0x%x)\n", (int)req, (int)requestStream, (int)connection);
+    fprintf(stderr, "httpTransmitRequest(req = 0x%p, requestStream = 0x%p, conn = 0x%p)\n", req, requestStream, connection);
 #endif
     requestTransmitted = transmitRequest1(req, requestStream, &error, FALSE);
     if (error.error != 0) {
@@ -1213,7 +1213,7 @@ static void httpReceiveResponse(void *request, _CFNetConnectionRef conn, const v
     Boolean useThisStream;
     int state;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestReceiveResponse(req = 0x%x, responseStream = 0x%x, conn = 0x%x)\n", (int)req, (int)responseStream, (int)(conn));
+    fprintf(stderr, "httpRequestReceiveResponse(req = 0x%p, responseStream = 0x%p, conn = 0x%p)\n", req, responseStream, conn);
 #endif
     if (__CFBitIsSet(req->flags, IN_READ_CALLBACK)) return; // We're here because the client is already reading; httpRequestRead will take care of this....
     // Check if there's anything for us to do....
@@ -1381,7 +1381,7 @@ static _CFNetConnectionRef getConnectionForRequest(_CFHTTPRequest *req, Boolean 
     error->error = 0;
 #if (DEBUG)
     if (__CFBitIsSet(req->flags, IS_ZOMBIE)) {
-        CFLog(0, CFSTR("Asked to enqueue a zombie request <0x%x>"), req);
+        CFLog(0, CFSTR("Asked to enqueue a zombie request <0x%p>"), req);
         error->domain = kCFStreamErrorDomainHTTP;
         error->error = -1000; // ???
         return NULL;
@@ -1643,7 +1643,7 @@ static Boolean httpRequestOpen(CFReadStreamRef stream, CFStreamError *error, Boo
     CFHTTPMessageRef newRequest = CFHTTPMessageCreateCopy(CFGetAllocator(stream), http->originalRequest);
     Boolean result;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestOpen(req = 0x%x)\n", (int)http);
+    fprintf(stderr, "httpRequestOpen(req = 0x%p)\n", http);
 #endif
     if (!resetForRequest(newRequest, http, error)) {
         *openComplete = TRUE;
@@ -1660,7 +1660,7 @@ static Boolean httpRequestOpenCompleted(CFReadStreamRef stream, CFStreamError *e
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
     int currentState;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestOpenCompleted(req = 0x%x)\n", (int)req);
+    fprintf(stderr, "httpRequestOpenCompleted(req = 0x%p)\n", req);
 #endif
     if (__CFBitIsSet(req->flags, OPEN_SIGNALLED)) return TRUE;
     if (req->proxyStream) {
@@ -1805,7 +1805,7 @@ static Boolean checkHeaders(_CFHTTPRequest *http, CFReadStreamRef stream, CFStre
     int nextAction;
 
     if (!stream) {
-        CFLog(0, CFSTR("Internal consistency check error for http request 0x%x"), http);
+        CFLog(0, CFSTR("Internal consistency check error for http request 0x%p"), http);
         error->domain = kCFStreamErrorDomainHTTP;
         error->error = -1;
         return TRUE;
@@ -1955,7 +1955,7 @@ static CFIndex httpRequestRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex bu
     _CFNetConnectionRef oldConn;
     enum _CFNetConnectionState state;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestRead(req = 0x%x)\n", (int)req);
+    fprintf(stderr, "httpRequestRead(req = 0x%p)\n", req);
 #endif
 
     if (req->proxyStream) {
@@ -2045,7 +2045,7 @@ static Boolean httpRequestCanRead(CFReadStreamRef ourStream, void *info) {
     int state;
     CFReadStreamRef stream;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestCanRead(req = 0x%x)\n", (int)req);
+    fprintf(stderr, "httpRequestCanRead(req = 0x%p)\n", req);
 #endif
     if (req->proxyStream) {
         // Attempt to get the proxy info
@@ -2111,7 +2111,7 @@ static Boolean httpRequestCanRead(CFReadStreamRef ourStream, void *info) {
 static void httpRequestClose(CFReadStreamRef stream, void *info) {
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestClose(req = 0x%x)\n", (int)req);
+    fprintf(stderr, "httpRequestClose(req = 0x%p)\n", req);
 #endif
     if (req->conn) {
         dequeueFromConnection1(req);
@@ -2127,7 +2127,7 @@ static CFTypeRef httpRequestCopyProperty(CFReadStreamRef stream, CFStringRef pro
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
     CFTypeRef property = NULL;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestCopyProperty(req = 0x%x)\n", (int)req);
+    fprintf(stderr, "httpRequestCopyProperty(req = 0x%p)\n", req);
 #endif
     if (CFEqual(propertyName, kCFStreamPropertyHTTPResponseHeader)) {
         property = req->responseHeaders;
@@ -2190,7 +2190,7 @@ static CFTypeRef httpRequestCopyProperty(CFReadStreamRef stream, CFStringRef pro
 static Boolean httpRequestSetProperty(CFReadStreamRef stream, CFStringRef propertyName, CFTypeRef propertyValue, void *info) {
     _CFHTTPRequest *http = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestSetProperty(req = 0x%x)\n", (int)http);
+    fprintf(stderr, "httpRequestSetProperty(req = 0x%p)\n", http);
 #endif
     if (CFReadStreamGetStatus(stream) > kCFStreamStatusNotOpen) return FALSE;
     if (CFEqual(propertyName, kCFStreamPropertyHTTPShouldAutoredirect)) {
@@ -2312,7 +2312,7 @@ static Boolean httpRequestSetProperty(CFReadStreamRef stream, CFStringRef proper
 static void httpRequestSchedule(CFReadStreamRef stream, CFRunLoopRef runLoop, CFStringRef runLoopMode, void *info) {
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestSchedule(req = 0x%x)\n", (int)req);
+    fprintf(stderr, "httpRequestSchedule(req = 0x%p)\n", req);
 #endif
     if (_CFHTTPRequestGetState(req) < kFinished) {
         if (req->conn) {
@@ -2327,7 +2327,7 @@ static void httpRequestSchedule(CFReadStreamRef stream, CFRunLoopRef runLoop, CF
 static void httpRequestUnschedule(CFReadStreamRef stream, CFRunLoopRef runLoop, CFStringRef runLoopMode, void *info) {
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "httpRequestUnschedule(req = 0x%x)\n", (int)req);
+    fprintf(stderr, "httpRequestUnschedule(req = 0x%p)\n", req);
 #endif
      if (_CFHTTPRequestGetState(req) < kFinished) {
         if (req->conn) {
@@ -2342,7 +2342,7 @@ static void httpRequestUnschedule(CFReadStreamRef stream, CFRunLoopRef runLoop, 
 static void requestPayloadCallBack(CFReadStreamRef stream, CFStreamEventType type, void *info) {
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "requestPayloadCallBack(req = 0x%x, event = %d)\n", (int)req, type);
+    fprintf(stderr, "requestPayloadCallBack(req = 0x%p, event = %ld)\n", req, type);
 #endif
     switch (type) {
     case kCFStreamEventEndEncountered:
@@ -2463,7 +2463,7 @@ void httpResponseStreamCallBack(void *theReq, CFReadStreamRef stream, CFStreamEv
     _CFHTTPRequest *req = (_CFHTTPRequest *)theReq;
     Boolean justReadMark = FALSE;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "responseStreamCallBack(req = 0x%x, event = %d)\n", (int)req, type);
+    fprintf(stderr, "responseStreamCallBack(req = 0x%p, event = %ld)\n", req, type);
 #endif
     if (!__CFBitIsSet(req->flags, HAVE_READ_MARK)) {
         justReadMark = TRUE;
@@ -2543,7 +2543,7 @@ void httpResponseStreamCallBack(void *theReq, CFReadStreamRef stream, CFStreamEv
 void httpRequestStreamCallBack(void *info, CFWriteStreamRef stream, CFStreamEventType type, _CFNetConnectionRef conn, const void* key) {
     _CFHTTPRequest *req = (_CFHTTPRequest *)info;
 #if defined(LOG_REQUESTS)
-    fprintf(stderr, "requestStreamCallBack(req = 0x%x, event = %d)\n", (int)req, type);
+    fprintf(stderr, "requestStreamCallBack(req = 0x%p, event = %ld)\n", req, type);
 #endif
     switch (type) {
     case kCFStreamEventCanAcceptBytes: {

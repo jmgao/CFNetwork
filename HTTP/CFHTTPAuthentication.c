@@ -188,10 +188,10 @@ static CONST_STRING_DECL(kCFHTTPAuthenticationComma, ",")
 
 #ifdef __CONSTANT_CFSTRINGS__
 #define kHTTPAuthenticationUndecidedMethodDescription				CFSTR("<undecided>")
-#define kHTTPAuthenticationDescriptionFormat	CFSTR("<CFHTTPAuthentication 0x%x>{state = %s; scheme = %@, forProxy = %s}")
+#define kHTTPAuthenticationDescriptionFormat	CFSTR("<CFHTTPAuthentication 0x%p>{state = %s; scheme = %@, forProxy = %s}")
 #else
 static CONST_STRING_DECL(kHTTPAuthenticationUndecidedMethodDescription, "<undecided>")
-static CONST_STRING_DECL(kHTTPAuthenticationDescriptionFormat, "<CFHTTPAuthentication 0x%x>{state = %s; scheme = %@, forProxy = %s}")
+static CONST_STRING_DECL(kHTTPAuthenticationDescriptionFormat, "<CFHTTPAuthentication 0x%p>{state = %s; scheme = %@, forProxy = %s}")
 #endif	/* __CONSTANT_CFSTRINGS__ */
 
 // Basic authentication strings
@@ -1430,7 +1430,7 @@ CFStringRef _CFStringCreateDigestHashA2(CFAllocatorRef alloc, CFHTTPAuthenticati
                 method = CFRetain(kCFHTTPAuthenticationCONNECTMethod);
 
                 CFRelease(path);
-                path = CFStringCreateWithFormat(alloc, NULL, kCFHTTPAuthenticationHostPortFormat, host, ((port == -1) ? 443 : port));
+                path = CFStringCreateWithFormat(alloc, NULL, kCFHTTPAuthenticationHostPortFormat, host, (int)((port == -1) ? 443 : port));
             }
             CFRelease(scheme);
         }
@@ -1491,7 +1491,7 @@ CFStringRef _CFStringCreateDigestHash(CFAllocatorRef alloc, CFHTTPAuthentication
 										kCFHTTPAuthenticationDigestHashQopFormat,
 										a1,
 										_CFHTTPAuthenticationGetProperty(auth, kCFHTTPAuthenticationPropertyDigestNonce),
-										value,
+										(unsigned long) value,
 										_CFHTTPAuthenticationGetProperty(auth, kCFHTTPAuthenticationPropertyDigestCNonce),
 										_CFHTTPAuthenticationGetProperty(auth, kCFHTTPAuthenticationPropertyDigestQop),
 										a2);
@@ -1537,7 +1537,7 @@ CFStringRef _CFStringCreateDigestAuthenticationHeaderValueForRequest(CFAllocator
                 CFStringRef host = CFURLCopyHostName(url);
 
                 CFRelease(path);
-                path = CFStringCreateWithFormat(alloc, NULL, kCFHTTPAuthenticationHostPortFormat, host, ((port == -1) ? 443 : port));
+                path = CFStringCreateWithFormat(alloc, NULL, kCFHTTPAuthenticationHostPortFormat, host, (int)((port == -1) ? 443 : port));
             }
             CFRelease(scheme);
         }
@@ -1588,7 +1588,7 @@ CFStringRef _CFStringCreateDigestAuthenticationHeaderValueForRequest(CFAllocator
 							 NULL,
 							 kCFHTTPAuthenticationDigestHeaderNoncesFormat,
 							 qCNonce,
-							 nc,
+							 (unsigned long)nc,
 							 value);
 
         CFRelease(qCNonce);
@@ -2176,7 +2176,7 @@ CFHTTPAuthenticationRef CFHTTPAuthenticationCreateFromResponse(CFAllocatorRef al
                     break;
             }
 
-            value = CFStringCreateWithFormat(alloc, NULL, kCFHTTPAuthenticationMD5HashFormat, (UInt32)result);
+            value = CFStringCreateWithFormat(alloc, NULL, kCFHTTPAuthenticationMD5HashFormat, (unsigned long)result);
             hash = _CFStringCreateMD5HashWithString(alloc, value);
 
             CFRelease(value);

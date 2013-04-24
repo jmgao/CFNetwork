@@ -223,8 +223,8 @@ static CONST_STRING_DECL(kHTMLTagClose, ">")
 #define kCFFTPTYPECommandString				CFSTR("TYPE I\r\n")
 #define kCFFTPPASVCommandString				CFSTR("PASV\r\n")
 #define kCFFTPEPSVCommandString				CFSTR("EPSV\r\n")
-#define kCFFTPPORTCommandString				CFSTR("PORT %lu,%lu,%lu,%lu,%lu,%lu\r\n")
-#define kCFFTPEPRTCommandString				CFSTR("EPRT |2|%x:%x:%x:%x:%x:%x:%x:%x|%lu|\r\n")
+#define kCFFTPPORTCommandString				CFSTR("PORT %u,%u,%u,%u,%u,%u\r\n")
+#define kCFFTPEPRTCommandString				CFSTR("EPRT |2|%x:%x:%x:%x:%x:%x:%x:%x|%u|\r\n")
 #define kCFFTPRESTCommandString				CFSTR("REST %lld\r\n")
 #define kCFFTPSTATCommandString				CFSTR("STAT %@\r\n")
 #define kCFFTPSIZECommandString				CFSTR("SIZE %@\r\n")
@@ -248,8 +248,8 @@ static CONST_STRING_DECL(kCFFTPPWDCommandString, "PWD\r\n")
 static CONST_STRING_DECL(kCFFTPTYPECommandString, "TYPE I\r\n")
 static CONST_STRING_DECL(kCFFTPPASVCommandString, "PASV\r\n")
 static CONST_STRING_DECL(kCFFTPEPSVCommandString, "EPSV\r\n")
-static CONST_STRING_DECL(kCFFTPPORTCommandString, "PORT %lu,%lu,%lu,%lu,%lu,%lu\r\n")
-static CONST_STRING_DECL(kCFFTPEPRTCommandString, "EPRT |2|%x:%x:%x:%x:%x:%x:%x:%x|%lu|\r\n")
+static CONST_STRING_DECL(kCFFTPPORTCommandString, "PORT %u,%u,%u,%u,%u,%u\r\n")
+static CONST_STRING_DECL(kCFFTPEPRTCommandString, "EPRT |2|%x:%x:%x:%x:%x:%x:%x:%x|%u|\r\n")
 static CONST_STRING_DECL(kCFFTPRESTCommandString, "REST %lld\r\n")
 static CONST_STRING_DECL(kCFFTPSTATCommandString, "STAT %@\r\n")
 static CONST_STRING_DECL(kCFFTPSIZECommandString, "SIZE %@\r\n")
@@ -610,10 +610,10 @@ _FTPStreamCopyDescription(CFTypeRef stream, _CFFTPStreamContext* ctxt) {
     return CFStringCreateWithFormat(CFGetAllocator(stream),
                                     NULL,
                                     kCFFTPStreamDescriptionFormat,
-                                    (int)stream,
+                                    (void *)stream,
                                     __CFBitIsSet(ctxt->_flags, kFlagBitPerformUpload) ? kCFFTPStreamUploadDescription : kCFFTPStreamDownloadDescription,
                                     ctxt->_url,
-                                    ctxt->_flags);
+                                    (int)ctxt->_flags);
 }
 
 
@@ -1988,7 +1988,7 @@ _FTPConnectionTransmitRequest(_CFFTPStreamContext* ctxt, _CFNetConnectionRef con
                     newUser = CFStringCreateWithFormat(alloc, NULL, kFTPProxyFormat, user, host);
                 }
                 else
-                    newUser = CFStringCreateWithFormat(alloc, NULL, CFSTR("%@@%@:%ld"), user, host, port);
+                    newUser = CFStringCreateWithFormat(alloc, NULL, CFSTR("%@@%@:%ld"), user, host, (long)port);
 
                 CFRelease(user);
                 user = newUser;

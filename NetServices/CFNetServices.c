@@ -72,11 +72,11 @@
 #ifdef __CONSTANT_CFSTRINGS__
 #define _kCFNetServiceBlockingMode			CFSTR("_kCFNetServiceBlockingMode")
 #define _kCFNetServiceEmptyString			CFSTR("")
-#define _kCFNetServiceDebugFormatString		CFSTR("<CFNetService 0x%x>{domain=%@, type=%@, name=%@, specific=%@, addresses=%@}")
+#define _kCFNetServiceDebugFormatString		CFSTR("<CFNetService 0x%p>{domain=%@, type=%@, name=%@, specific=%@, addresses=%@}")
 #else
 static CONST_STRING_DECL(_kCFNetServiceBlockingMode, "_kCFNetServiceBlockingMode")
 static CONST_STRING_DECL(_kCFNetServiceEmptyString, "")
-static CONST_STRING_DECL(_kCFNetServiceDebugFormatString, "<CFNetService 0x%x>{domain=%@, type=%@, name=%@, specific=%@, addresses=%@}")
+static CONST_STRING_DECL(_kCFNetServiceDebugFormatString, "<CFNetService 0x%p>{domain=%@, type=%@, name=%@, specific=%@, addresses=%@}")
 #endif	/* __CONSTANT_CFSTRINGS__ */
 
 static const char _kCFNetServiceClassName[] = "CFNetService";

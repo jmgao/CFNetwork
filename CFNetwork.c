@@ -630,7 +630,7 @@ _CFStringCreateRFC1123DateStringWithGregorianDate(CFAllocatorRef alloc, CFGregor
 										  CFSTR("%02d %s %04ld %02d:%02d:%02d %+03d%02d"),
 										  date->day,
 										  kMonthStrs[date->month + 11],		/* Offset to the short names */
-										  date->year,
+										  (long)date->year,
 										  date->hour,
 										  date->minute,
 										  (int)date->second,
@@ -658,7 +658,7 @@ _CFStringCreateRFC2616DateStringWithGregorianDate(CFAllocatorRef alloc, CFGregor
 										  kDayStrs[6 + day],
 										  date->day,
 										  kMonthStrs[date->month + 11],		/* Offset to the short names */
-										  date->year,
+										  (long)date->year,
 										  date->hour,
 										  date->minute,
 										  (int)date->second);

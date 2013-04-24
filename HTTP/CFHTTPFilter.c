@@ -174,7 +174,7 @@ static void *httpRdFilterCreate(CFReadStreamRef stream, void *info) {
     filter->filteredStream.r = stream; // Do not retain; that will introduce a retain loop.
     filter->customSSLContext = NULL;
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: Creating read filter 0x%x\n", (unsigned)filter);
+    fprintf(stderr, "HTTPFilter: Creating read filter 0x%p\n", filter);
 #endif
     return filter;
 }
@@ -182,7 +182,7 @@ static void *httpRdFilterCreate(CFReadStreamRef stream, void *info) {
 static void httpRdFilterDealloc(CFReadStreamRef stream, void *info) {
     _CFHTTPFilter *filter = (_CFHTTPFilter *)info;
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: Destroying read filter 0x%x\n", (unsigned)filter);
+    fprintf(stderr, "HTTPFilter: Destroying read filter 0x%p\n", filter);
 #endif
 	__CFSpinLock(&filter->lock);
     if (filter->header) CFRelease(filter->header);
@@ -202,7 +202,7 @@ static void httpRdFilterStreamCallBack(CFReadStreamRef stream, CFStreamEventType
     _CFHTTPFilter *filter = (_CFHTTPFilter *)CFReadStreamGetInfoPointer(filterStream);
 
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: httpRdFilterStreamCallBack(stream = 0x%x, event = %d, filter = 0x%x)\n", (unsigned)stream, event, (unsigned)filter);
+    fprintf(stderr, "HTTPFilter: httpRdFilterStreamCallBack(stream = 0x%p, event = %ld, filter = 0x%p)\n", stream, event, filter);
 #endif
     switch (event) {
     case kCFStreamEventHasBytesAvailable:
@@ -253,7 +253,7 @@ static Boolean httpRdFilterOpen(CFReadStreamRef stream, CFStreamError *errorCode
     CFStreamStatus status;
 	__CFSpinLock(&filter->lock);
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: httpRdFilterOpen(stream = 0x%x, filter = 0x%x)\n", (unsigned)stream, (unsigned)filter);
+    fprintf(stderr, "HTTPFilter: httpRdFilterOpen(stream = 0x%p, filter = 0x%p)\n", stream, filter);
 #endif
     CFReadStreamSetClient(filter->socketStream.r, kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered, (CFReadStreamClientCallBack)httpRdFilterStreamCallBack, &clientContext);
     status = CFReadStreamGetStatus(filter->socketStream.r);
@@ -279,7 +279,7 @@ static void httpRdFilterClose(CFReadStreamRef stream, void *info) {
     _CFHTTPFilter *filter = (_CFHTTPFilter *)info;
 	__CFSpinLock(&filter->lock);
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: httpRdFilterClose(stream = 0x%x, filter = 0x%x)\n", (unsigned)stream, (unsigned)filter);
+    fprintf(stderr, "HTTPFilter: httpRdFilterClose(stream = 0x%p, filter = 0x%p)\n", stream, filter);
 #endif
     CFReadStreamClose(filter->socketStream.r);
 	__CFSpinUnlock(&filter->lock);
@@ -289,7 +289,7 @@ static void httpRdFilterSchedule(CFReadStreamRef stream, CFRunLoopRef runLoop, C
     _CFHTTPFilter *filter = (_CFHTTPFilter *)info;
 	__CFSpinLock(&filter->lock);
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: httpRdFilterSchedule(stream = 0x%x, runLoop = 0x%x, mode = 0x%x, filter = 0x%x)\n", (unsigned)stream, (unsigned)runLoop, (unsigned)runLoopMode, (unsigned)filter);
+    fprintf(stderr, "HTTPFilter: httpRdFilterSchedule(stream = 0x%p, runLoop = 0x%p, mode = 0x%p, filter = 0x%p)\n", stream, runLoop, runLoopMode, filter);
 #endif
     CFReadStreamScheduleWithRunLoop(filter->socketStream.r, runLoop, runLoopMode);
 	__CFSpinUnlock(&filter->lock);
@@ -299,7 +299,7 @@ static void httpRdFilterUnschedule(CFReadStreamRef stream, CFRunLoopRef runLoop,
     _CFHTTPFilter *filter = (_CFHTTPFilter *)info;
 	__CFSpinLock(&filter->lock);
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: httpRdFilterUnschedule(stream = 0x%x, runLoop = 0x%x, mode = 0x%x, filter = 0x%x)\n", (unsigned)stream, (unsigned)runLoop, (unsigned)runLoopMode, (unsigned)filter);
+    fprintf(stderr, "HTTPFilter: httpRdFilterUnschedule(stream = 0x%p, runLoop = 0x%p, mode = 0x%p, filter = 0x%p)\n", stream, runLoop, runLoopMode, filter);
 #endif
     CFReadStreamUnscheduleFromRunLoop(filter->socketStream.r, runLoop, runLoopMode);
 	__CFSpinUnlock(&filter->lock);
@@ -1082,7 +1082,7 @@ static CFIndex httpRdFilterRead(CFReadStreamRef stream, UInt8 *buffer, CFIndex b
     int result;
 	__CFSpinLock(&httpFilter->lock);
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: httpRdFilterRead(stream = 0x%x, filter = 0x%x) - ", (unsigned)stream, (unsigned)httpFilter);
+    fprintf(stderr, "HTTPFilter: httpRdFilterRead(stream = 0x%p, filter = 0x%p) - ", stream, httpFilter);
 #endif
 
     if (__CFBitIsSet(httpFilter->flags, PARSE_FAILED)) {
@@ -1208,7 +1208,7 @@ static Boolean httpRdFilterCanRead(CFReadStreamRef stream, void *info) {
         CFReadStreamSignalEvent(stream, kCFStreamEventErrorOccurred, &error);
     }
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: httpRdFilterCanRead(stream = 0x%x, filter = 0x%x) - returning %s\n", (unsigned)stream, (unsigned)httpFilter, result ? "TRUE" : "FALSE");
+    fprintf(stderr, "HTTPFilter: httpRdFilterCanRead(stream = 0x%p, filter = 0x%p) - returning %s\n", stream, httpFilter, result ? "TRUE" : "FALSE");
 #endif
     return result;
 }
@@ -1232,7 +1232,7 @@ void _CFHTTPReadStreamReadMark(CFReadStreamRef fStream) {
 	__CFSpinLock(&httpFilter->lock);
 
 #if defined(LOG_FILTER)
-    fprintf(stderr, "HTTPFilter: _CFHTTPReadStreamReadMark(stream = 0x%x, filter = 0x%x)\n ", (unsigned)fStream, (unsigned)httpFilter);
+    fprintf(stderr, "HTTPFilter: _CFHTTPReadStreamReadMark(stream = 0x%p, filter = 0x%p)\n ", fStream, httpFilter);
 #endif
     if (__CFBitIsSet(httpFilter->flags, MARK_ENABLED) && __CFBitIsSet(httpFilter->flags, AT_MARK)) {
         CFHTTPMessageRef newHeader;
