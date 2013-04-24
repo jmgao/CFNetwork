@@ -1308,7 +1308,7 @@ _SocketStreamCopyProperty(CFTypeRef stream, CFStringRef propertyName, _CFSocketS
 
 			CFDataRef wrapper = (CFDataRef)CFDictionaryGetValue(ctxt->_properties, kCFStreamPropertySocketSSLContext);
 			if (wrapper) {
-				if (SSLGetPeerCertificates(*((SSLContextRef*)CFDataGetBytePtr(wrapper)), (CFArrayRef*)&result) && result) {
+				if (SSLCopyPeerCertificates(*((SSLContextRef*)CFDataGetBytePtr(wrapper)), (CFArrayRef*)&result) && result) {
 					CFRelease(result);
 					result = NULL;
 				}
