@@ -1349,7 +1349,7 @@ static Boolean httpRdFilterSetProperty(CFReadStreamRef stream, CFStringRef propN
     }
 }
 
-static const CFReadStreamCallBacks HTTPReadFilterCallBacks = {1,
+static const CFReadStreamCallBacksV1 HTTPReadFilterCallBacks = {1,
 httpRdFilterCreate
 , httpRdFilterDealloc
 , NULL /*copyDesc*/, httpRdFilterOpen
@@ -1372,7 +1372,7 @@ CFReadStreamRef CFReadStreamCreateHTTPStream(CFAllocatorRef alloc, CFReadStreamR
     } else {
         filter.header = CFHTTPMessageCreateEmpty(alloc, TRUE);
     }
-    stream = CFReadStreamCreate(alloc, &HTTPReadFilterCallBacks, &filter);
+    stream = CFReadStreamCreate(alloc, (const CFReadStreamCallBacks *)&HTTPReadFilterCallBacks, &filter);
     CFRelease(filter.header);
     return stream;
 }
@@ -1932,7 +1932,7 @@ static void httpWrFilterUnschedule(CFWriteStreamRef stream, CFRunLoopRef runLoop
 	__CFSpinUnlock(&filter->lock);
 }
 
-static const CFWriteStreamCallBacks httpFilteredStreamCBs = {1,
+static const CFWriteStreamCallBacksV1 httpFilteredStreamCBs = {1,
 httpWrFilterCreate,
 httpWrFilterDealloc, NULL /* copyDesc */,
 httpWrFilterOpen, NULL /* openCompleted */,
@@ -1953,7 +1953,7 @@ CFWriteStreamRef CFWriteStreamCreateHTTPStream(CFAllocatorRef alloc, CFHTTPMessa
         __CFBitSet(filter.flags, IS_PROXY);
     }
     filter.socketStream.w = socketStream;
-    stream = CFWriteStreamCreate(alloc, &httpFilteredStreamCBs, &filter);
+    stream = CFWriteStreamCreate(alloc, (const CFWriteStreamCallBacks *)&httpFilteredStreamCBs, &filter);
     if (header) {
         CFWriteStreamSetProperty(stream, _kCFStreamPropertyHTTPNewHeader, header);
     }

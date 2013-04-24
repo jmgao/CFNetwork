@@ -496,7 +496,7 @@ extern CFDataRef _CFHTTPMessageCopySerializedHeaders(CFHTTPMessageRef msg, Boole
 #pragma mark *CFReadStreamCallBacks
 #endif
 
-static const CFReadStreamCallBacks
+static const CFReadStreamCallBacksV1
 kSocketReadStreamCallBacks = {
     1,										/* version */
     NULL,									/* create */
@@ -519,7 +519,7 @@ kSocketReadStreamCallBacks = {
 #pragma mark *CFWriteStreamCallBacks
 #endif
 
-static const CFWriteStreamCallBacks
+static const CFWriteStreamCallBacksV1
 kSocketWriteStreamCallBacks = {
     1,										/* version */
     NULL,									/* create */
@@ -6555,13 +6555,13 @@ CFStreamCreatePairWithSocketToCFHost(CFAllocatorRef alloc, CFHostRef host, UInt3
 
 			/* Create the read stream if the client asked for it. */
 			if (readStream) {
-				*readStream = CFReadStreamCreate(alloc, &kSocketReadStreamCallBacks, ctxt);
+				*readStream = CFReadStreamCreate(alloc, (const CFReadStreamCallBacks *)&kSocketReadStreamCallBacks, ctxt);
 				ctxt->_clientReadStream = *readStream;
 			}
 
 			/* Create the write stream if the client asked for it. */
 			if (writeStream) {
-				*writeStream = CFWriteStreamCreate(alloc, &kSocketWriteStreamCallBacks, ctxt);
+				*writeStream = CFWriteStreamCreate(alloc, (const CFWriteStreamCallBacks *)&kSocketWriteStreamCallBacks, ctxt);
 				ctxt->_clientWriteStream = *writeStream;
 			}
 
@@ -6598,13 +6598,13 @@ CFStreamCreatePairWithSocketToNetService(CFAllocatorRef alloc, CFNetServiceRef s
 
 		/* Create the read stream if the client asked for it. */
 		if (readStream) {
-			*readStream = CFReadStreamCreate(alloc, &kSocketReadStreamCallBacks, ctxt);
+			*readStream = CFReadStreamCreate(alloc, (const CFReadStreamCallBacks *)&kSocketReadStreamCallBacks, ctxt);
 			ctxt->_clientReadStream = *readStream;
 		}
 
 		/* Create the write stream if the client asked for it. */
 		if (writeStream) {
-			*writeStream = CFWriteStreamCreate(alloc, &kSocketWriteStreamCallBacks, ctxt);
+			*writeStream = CFWriteStreamCreate(alloc, (const CFWriteStreamCallBacks *)&kSocketWriteStreamCallBacks, ctxt);
 			ctxt->_clientWriteStream = *writeStream;
 		}
 
@@ -6728,13 +6728,13 @@ _CFStreamCreatePairWithCFSocketSignaturePieces(CFAllocatorRef alloc, SInt32 prot
 
 			/* Create the read stream if the client asked for it. */
 			if (readStream) {
-				*readStream = CFReadStreamCreate(alloc, &kSocketReadStreamCallBacks, ctxt);
+				*readStream = CFReadStreamCreate(alloc, (const CFReadStreamCallBacks *)&kSocketReadStreamCallBacks, ctxt);
 				ctxt->_clientReadStream = *readStream;
 			}
 
 			/* Create the write stream if the client asked for it. */
 			if (writeStream) {
-				*writeStream = CFWriteStreamCreate(alloc, &kSocketWriteStreamCallBacks, ctxt);
+				*writeStream = CFWriteStreamCreate(alloc, (const CFWriteStreamCallBacks *)&kSocketWriteStreamCallBacks, ctxt);
 				ctxt->_clientWriteStream = *writeStream;
 			}
 
@@ -6851,13 +6851,13 @@ _CFSocketStreamCreatePair(CFAllocatorRef alloc, CFStringRef host, UInt32 port, C
 
 				/* Create the read stream if the client asked for it. */
 				if (readStream) {
-					*readStream = CFReadStreamCreate(alloc, &kSocketReadStreamCallBacks, ctxt);
+					*readStream = CFReadStreamCreate(alloc, (const CFReadStreamCallBacks *)&kSocketReadStreamCallBacks, ctxt);
 					ctxt->_clientReadStream = *readStream;
 				}
 
 				/* Create the write stream if the client asked for it. */
 				if (writeStream) {
-					*writeStream = CFWriteStreamCreate(alloc, &kSocketWriteStreamCallBacks, ctxt);
+					*writeStream = CFWriteStreamCreate(alloc, (const CFWriteStreamCallBacks *)&kSocketWriteStreamCallBacks, ctxt);
 					ctxt->_clientWriteStream = *writeStream;
 				}
 

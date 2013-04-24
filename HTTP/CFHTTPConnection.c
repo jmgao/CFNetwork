@@ -163,7 +163,7 @@ static const _CFNetConnectionCallBacks HTTPConnectionCallBacks =  {
   httpConnectionRLArrayForRequest
 };
 
-static const CFReadStreamCallBacks HTTPStreamCallBacks = {
+static const CFReadStreamCallBacksV1 HTTPStreamCallBacks = {
     1,
     httpStreamCreate,
     httpStreamFinalize,
@@ -957,7 +957,7 @@ CFReadStreamRef CFHTTPConnectionEnqueue(CFHTTPConnectionRef connection, CFHTTPMe
     info.conn = (_CFNetConnectionRef)connection;
     info.stream = NULL;
     info.stateChangeSource = NULL;
-    return CFReadStreamCreate(CFGetAllocator(connection), &HTTPStreamCallBacks, &info);
+    return CFReadStreamCreate(CFGetAllocator(connection), (const CFReadStreamCallBacks *)&HTTPStreamCallBacks, &info);
 }
 
 CFReadStreamRef CFHTTPConnectionEnqueueWithBodyStream(CFHTTPConnectionRef connection, CFHTTPMessageRef request, CFReadStreamRef bodyStream) {
@@ -971,7 +971,7 @@ CFReadStreamRef CFHTTPConnectionEnqueueWithBodyStream(CFHTTPConnectionRef connec
     info.conn = (_CFNetConnectionRef)connection;
     info.stream = NULL;
     info.stateChangeSource = NULL;
-    return CFReadStreamCreate(CFGetAllocator(connection), &HTTPStreamCallBacks, &info);
+    return CFReadStreamCreate(CFGetAllocator(connection), (const CFReadStreamCallBacks *)&HTTPStreamCallBacks, &info);
 }
 
 static void *httpStreamCreate(CFReadStreamRef stream, void *info) {

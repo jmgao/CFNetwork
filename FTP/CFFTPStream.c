@@ -4668,7 +4668,7 @@ CFWriteStreamCreateWithFTPURL(CFAllocatorRef alloc, CFURLRef ftpURL) {
 
         if (ctxt->_url && ctxt->_runloops && ctxt->_properties) {
 
-			CFWriteStreamCallBacks _FTPWriteStreamCallBacks;
+			CFWriteStreamCallBacksV1 _FTPWriteStreamCallBacks;
 
 			memset(&_FTPWriteStreamCallBacks, 0, sizeof(_FTPWriteStreamCallBacks));
 
@@ -4685,7 +4685,7 @@ CFWriteStreamCreateWithFTPURL(CFAllocatorRef alloc, CFURLRef ftpURL) {
 			_FTPWriteStreamCallBacks.schedule = (void (*)(CFWriteStreamRef, CFRunLoopRef, CFStringRef, void*))_FTPStreamSchedule;
 			_FTPWriteStreamCallBacks.unschedule = (void (*)(CFWriteStreamRef, CFRunLoopRef, CFStringRef, void*))_FTPStreamUnschedule;
 
-            result = CFWriteStreamCreate(alloc, &_FTPWriteStreamCallBacks, ctxt);
+            result = CFWriteStreamCreate(alloc, (const CFWriteStreamCallBacks *)&_FTPWriteStreamCallBacks, ctxt);
 		}
 
         if (result) {
@@ -4803,7 +4803,7 @@ CFReadStreamCreateWithFTPURL(CFAllocatorRef alloc, CFURLRef ftpURL) {
 
         if (ctxt->_url && ctxt->_runloops && ctxt->_properties) {
 
-			CFReadStreamCallBacks _FTPReadStreamCallBacks;
+			CFReadStreamCallBacksV1 _FTPReadStreamCallBacks;
 
 			memset(&_FTPReadStreamCallBacks, 0, sizeof(_FTPReadStreamCallBacks));
 
@@ -4820,7 +4820,7 @@ CFReadStreamCreateWithFTPURL(CFAllocatorRef alloc, CFURLRef ftpURL) {
 			_FTPReadStreamCallBacks.schedule = (void (*)(CFReadStreamRef, CFRunLoopRef, CFStringRef, void*))_FTPStreamSchedule;
 			_FTPReadStreamCallBacks.unschedule = (void (*)(CFReadStreamRef, CFRunLoopRef, CFStringRef, void*))_FTPStreamUnschedule;
 
-            result = CFReadStreamCreate(alloc, &_FTPReadStreamCallBacks, ctxt);
+            result = CFReadStreamCreate(alloc, (const CFReadStreamCallBacks *)&_FTPReadStreamCallBacks, ctxt);
 		}
 
         if (result) {

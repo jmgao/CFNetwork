@@ -184,7 +184,7 @@ static Boolean httpRequestSetProperty(CFReadStreamRef stream, CFStringRef proper
 static void httpRequestSchedule(CFReadStreamRef stream, CFRunLoopRef runLoop, CFStringRef runLoopMode, void *info);
 static void httpRequestUnschedule(CFReadStreamRef stream, CFRunLoopRef runLoop, CFStringRef runLoopMode, void *info);
 
-static const CFReadStreamCallBacks _CFHTTPQueuedResponseStreamCallBacks = {
+static const CFReadStreamCallBacksV1 _CFHTTPQueuedResponseStreamCallBacks = {
     1,
     httpRequestCreate,
     httpRequestFinalize,
