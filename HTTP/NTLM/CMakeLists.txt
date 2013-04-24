@@ -1,0 +1,24 @@
+list (
+    APPEND
+    INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set (
+    INCLUDE_DIRECTORIES
+    "${INCLUDE_DIRECTORIES}"
+    PARENT_SCOPE
+)
+
+list (
+    APPEND
+    SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/ntlmBlobPriv.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/NtlmGenerator.cpp
+)
+
+set (
+    SOURCES
+    "${SOURCES}"
+    PARENT_SCOPE
+)

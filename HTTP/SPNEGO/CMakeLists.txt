@@ -1,0 +1,25 @@
+list (
+    APPEND
+    INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set (
+    INCLUDE_DIRECTORIES
+    "${INCLUDE_DIRECTORIES}"
+    PARENT_SCOPE
+)
+
+list (
+    APPEND
+    SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/spnegoBlob.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/spnegoDER.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/spnegoKrb.cpp
+)
+
+set (
+    SOURCES
+    "${SOURCES}"
+    PARENT_SCOPE
+)

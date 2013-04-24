@@ -1,0 +1,32 @@
+
+add_subdirectory(NTLM)
+add_subdirectory(SPNEGO)
+
+list (
+    APPEND
+    INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set (
+    INCLUDE_DIRECTORIES
+    "${INCLUDE_DIRECTORIES}"
+    PARENT_SCOPE
+)
+
+list (
+    APPEND
+    SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFHTTPAuthentication.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFHTTPConnection.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFHTTPFilter.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFHTTPMessage.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFHTTPServer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFHTTPStream.c
+)
+
+set (
+    SOURCES
+    "${SOURCES}"
+    PARENT_SCOPE
+)

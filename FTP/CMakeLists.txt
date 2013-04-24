@@ -1,0 +1,23 @@
+list (
+    APPEND
+    INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set (
+    INCLUDE_DIRECTORIES
+    "${INCLUDE_DIRECTORIES}"
+    PARENT_SCOPE
+)
+
+list (
+    APPEND
+    SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFFTPStream.c
+)
+
+set (
+    SOURCES
+    "${SOURCES}"
+    PARENT_SCOPE
+)

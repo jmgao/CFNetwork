@@ -1,0 +1,26 @@
+list (
+    APPEND
+    INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set (
+    INCLUDE_DIRECTORIES
+    "${INCLUDE_DIRECTORIES}"
+    PARENT_SCOPE
+)
+
+list (
+    APPEND
+    SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFNetServiceBrowser.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFNetServiceMonitor.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/CFNetServices.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/DeprecatedDNSServiceDiscovery.c
+)
+
+set (
+    SOURCES
+    "${SOURCES}"
+    PARENT_SCOPE
+)
