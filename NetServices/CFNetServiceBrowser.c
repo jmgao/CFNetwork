@@ -438,7 +438,7 @@ _BrowseReply(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex
 
 			if (service) {
 
-				UInt32 count = (UInt32)CFDictionaryGetValue(browser->_found, service);
+				intptr_t count = (intptr_t)CFDictionaryGetValue(browser->_found, service);
 
 				if (flags & kDNSServiceFlagsAdd) {
 

@@ -171,7 +171,7 @@ static Boolean _ServiceEqual(__CFNetService* s1, __CFNetService* s2);
 static CFHashCode _ServiceHash(__CFNetService* service);
 static CFStringRef _ServiceDescribe(__CFNetService* service);
 
-static Boolean _ServiceSetInfo(__CFNetService* service, UInt32 property, CFTypeRef value, Boolean publish);
+static Boolean _ServiceSetInfo(__CFNetService* service, uintptr_t property, CFTypeRef value, Boolean publish);
 static void _ServiceCancel(__CFNetService* service);
 static void _ServiceCancelDNSService_NoLock(__CFNetService* service, DNSServiceRef cancel);
 static void _ServiceCreateQuery_NoLock(__CFNetService* service, ns_type rrtype, const char* name,
@@ -452,7 +452,7 @@ _ServiceDescribe(__CFNetService* service) {
 
 
 /* static */ Boolean
-_ServiceSetInfo(__CFNetService* service, UInt32 property, CFTypeRef value, Boolean publish) {
+_ServiceSetInfo(__CFNetService* service, uintptr_t property, CFTypeRef value, Boolean publish) {
 
 	Boolean result = FALSE;
 
@@ -938,7 +938,7 @@ _RegisterReply(DNSServiceRef sdRef, DNSServiceFlags flags, DNSServiceErrorType e
 		int i;
 		CFAllocatorRef alloc = CFGetAllocator((CFNetServiceRef)service);
 		const char* values[] = {name, regtype, domain};
-		UInt32 keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
+		uintptr_t keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
 
 		if (errorCode) {
 		    service->_error.error = _DNSServiceErrorToCFNetServiceError(errorCode);
@@ -2092,7 +2092,7 @@ CFNetServiceRegisterWithOptions(CFNetServiceRef theService, CFOptionFlags option
 		char properties[3][1024];
 		CFSocketRef sock;
 		CFSocketContext ctxt = {0, service, CFRetain, CFRelease, NULL};
-		UInt32 keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
+		uintptr_t keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
 		DNSServiceFlags flags = ((options == kCFNetServiceFlagNoAutoRename) ? kDNSServiceFlagsNoAutoRename : 0);
 		CFDataRef txt = (CFDataRef)CFDictionaryGetValue(service->_info, (const void*)_kCFNetServiceTXT);
 
@@ -2278,7 +2278,7 @@ CFNetServiceResolveWithTimeout(CFNetServiceRef theService, CFTimeInterval timeou
 
 		int i;
 		char properties[3][1024];
-		UInt32 keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
+		uintptr_t keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
 
 		/* Check to see if there is an ongoing process already */
 		if (CFArrayGetCount(service->_sources)) {
@@ -2945,7 +2945,7 @@ CFNetServiceGetInfo(CFNetServiceRef theService, UInt32 property) {
 	__CFSpinLock(&(service->_lock));
 
 	/* Get the important bits */
-	result = (CFTypeRef)CFDictionaryGetValue(service->_info, (const void*)property);
+	result = (CFTypeRef)CFDictionaryGetValue(service->_info, (const void*)(uintptr_t)property);
 
 	/* Unlock the service again. */
 	__CFSpinUnlock(&(service->_lock));
@@ -3074,7 +3074,7 @@ CFNetServiceRegister(CFNetServiceRef theService, CFStreamError* error) {
 		CFMachPortRef prt = NULL;
 		CFAllocatorRef alloc = CFGetAllocator(theService);
 		CFMachPortContext ctxt = {0, service, CFRetain, CFRelease, NULL};
-		UInt32 keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain, _kCFNetServiceTXT};
+		uintptr_t keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain, _kCFNetServiceTXT};
 
 		/* Check to see if there is an ongoing process already */
 		if (CFArrayGetCount(service->_sources)) {
@@ -3244,7 +3244,7 @@ CFNetServiceResolve(CFNetServiceRef theService, CFStreamError* error) {
 		CFMachPortRef prt;
 		CFAllocatorRef alloc = CFGetAllocator(theService);
 		CFMachPortContext ctxt = {0, service, CFRetain, CFRelease, NULL};
-		UInt32 keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
+		uintptr_t keys[] = {_kCFNetServiceName, _kCFNetServiceType, _kCFNetServiceDomain};
 
 		/* Check to see if there is an ongoing process already */
 		if (CFArrayGetCount(service->_sources)) {
